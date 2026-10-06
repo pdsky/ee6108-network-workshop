@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#123c39">
+  <meta name="description" content="用可暂停、可单步播放的网络动画，理解子网、交换机、网关、静态路由和故障排查。">
+  <title>网络动画实验室 · 从地址到连通</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23123c39'/%3E%3Cpath d='M16 32h32M32 16v32' stroke='%23bceda0' stroke-width='5'/%3E%3Ccircle cx='32' cy='32' r='7' fill='%23bceda0'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="网络动画实验室首页"><span class="brand-mark" aria-hidden="true">↗</span><span>网络动画实验室<small>NETWORK WORKSHOP / EE6108</small></span></a>
+    <div class="top-actions"><span class="header-note">从地址到连通，看见每一跳。</span><button id="presentation" class="outline-btn" aria-pressed="false">进入演示模式 <span aria-hidden="true">↗</span></button></div>
+  </header>
+  <div class="workspace">
+    <aside class="sidebar" aria-label="实验导航">
+      <div class="sidebar-intro"><span class="eyebrow">一个校园 · 五个实验</span><h1>让数据包<br>走一遍。</h1><p>搭网络之前，先看懂<br>它为什么能通。</p></div>
+      <nav id="lesson-nav"></nav>
+      <div class="sidebar-case"><span class="mini-label">今天的任务</span><p>连接机房、办公室和实验室，让三个区域双向通信。</p><div class="case-stats"><span><b>3</b> 个区域</span><span><b>2</b> 台路由器</span></div></div>
+      <p class="sidebar-footer">适合课堂投屏与小组演示</p>
+    </aside>
+    <main>
+      <section class="lesson-heading">
+        <div><div class="eyebrow" id="lesson-kicker"></div><h2 id="lesson-title"></h2><p id="lesson-lead"></p></div>
+        <div class="lesson-actions"><button class="text-btn" id="study-open">学习讲义</button><button class="text-btn" id="teacher-toggle" aria-expanded="false">讲师提示 <span aria-hidden="true">＋</span></button></div>
+      </section>
+      <section id="address-workbench" class="address-workbench" hidden>
+        <div class="planner-card"><div class="card-heading"><span class="eyebrow">01 / 容量实验</span><h3>人变多，子网要多大？</h3><p id="subnet-explanation"></p></div>
+          <div class="planner-controls"><label>终端数量<input id="host-count" type="number" min="1" max="250" value="50"><small>另加 1 个网关地址</small></label><label>选择前缀<span id="prefix-label" class="prefix-number">/26</span><input id="prefix" type="range" min="24" max="30" value="26" aria-label="选择子网前缀"><span class="range-labels"><span>/24 · 大</span><span>/30 · 小</span></span></label><div class="capacity-box"><span>可用地址</span><b id="capacity">62</b><span id="capacity-result"></span></div></div>
+          <div class="address-blocks" id="address-blocks" aria-label="当前子网中的网络地址、可用地址与广播地址"></div><div class="planner-legend"><span><i class="network-dot"></i>网络地址</span><span><i class="host-dot"></i>可用主机地址</span><span><i class="broadcast-dot"></i>广播地址</span></div>
+        </div>
+        <div class="allocation-card"><span class="eyebrow">校园地址规划 / 192.168.10.0/24</span><h3>按需要分，地址不浪费。</h3><div class="allocation-bar" aria-label="A 区64个、B 区32个、C 区16个、路由器链路4个、剩余140个地址"><span class="allocation-a" style="flex:64">A</span><span class="allocation-b" style="flex:32">B</span><span class="allocation-c" style="flex:16">C</span><span class="allocation-link" style="flex:4" title="路由器链路 4 个地址"></span><span class="allocation-free" style="flex:140">预留地址</span></div><div class="allocation-labels"><span>A .0–.63</span><span>B .64–.95</span><span>C .96–.111</span><span>链路 .112–.115</span></div><div class="table-scroll"><table><caption class="sr-only">校园子网地址规划</caption><thead><tr><th>区域</th><th>子网</th><th>掩码</th><th>网关 / 接口</th></tr></thead><tbody id="address-plan"></tbody></table></div><p class="small-note">每区 2 台电脑代表实际需求。50 / 25 / 10 是规划容量，无需放置 85 台电脑。</p><button class="primary-btn" id="start-network">地址分好了，看看怎样通信 <span aria-hidden="true">→</span></button></div>
+      </section>
+      <section id="simulation-workbench" class="simulation-workbench" aria-label="网络动画演示">
+        <div class="simulation-toolbar"><div class="scenario-tabs" role="group" aria-label="通信场景"><button data-scenario="same">同一子网 <small>A1 → A2</small></button><button data-scenario="direct">两个子网 <small>A1 → B1</small></button><button data-scenario="remote">跨路由器 <small>A1 → C1</small></button></div><label class="fault-select">实验状态<select id="fault" aria-label="选择网络故障"></select></label></div>
+        <div class="simulation-body"><div class="network-stage"><div class="stage-heading"><div><span class="stage-label">LIVE TOPOLOGY</span><h3 id="path-heading">A1 <span>→</span> A2</h3></div><div class="packet-legend"><span><i class="arp-dot"></i>ARP</span><span><i class="request-dot"></i>请求</span><span><i class="reply-dot"></i>回复</span></div></div>
+            <svg id="network" viewBox="0 0 1000 550" role="img" aria-label="三个区域的校园网络拓扑，点击设备查看配置"><defs><pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="0.7" fill="#dfe6e3"/></pattern><filter id="packet-glow" x="-150%" y="-150%" width="400%" height="400%"><feGaussianBlur stdDeviation="7"/></filter></defs><rect width="1000" height="550" fill="url(#grid)"/><g id="zones"></g><g id="links"></g><g id="devices"></g><g id="packet" pointer-events="none"><circle id="packet-halo" r="17" opacity=".32" filter="url(#packet-glow)"/><circle id="packet-circle" r="9" stroke="white" stroke-width="3"/><text id="packet-symbol" text-anchor="middle" dy="4" fill="white" font-size="11" font-weight="700"></text></g></svg>
+            <div class="stage-foot"><span id="stage-status"><i></i>已准备 · 点击播放</span><span class="device-hint">点击设备，查看地址</span></div>
+          </div>
+          <aside class="step-panel" aria-label="当前步骤讲解"><div class="step-top"><span class="protocol-tag" id="protocol">检查</span><span id="step-count">01 / 06</span></div><h3 id="step-title"></h3><p id="step-description"></p><div class="packet-detail"><div><span>三层 · IP / 目标</span><p id="layer3"></p></div><div><span>二层 · 当前帧 / MAC</span><p id="layer2"></p></div></div><details id="step-note-details"><summary>这一步的讲解提示</summary><p id="step-note"></p></details><div id="repair-area" hidden><p id="fault-description"></p><button id="repair" class="repair-btn">修复配置并重放 <span aria-hidden="true">↻</span></button></div></aside>
+        </div>
+        <div class="playback"><div class="playback-buttons"><button id="reset" class="icon-btn" title="重置 (R)" aria-label="重置演示">↺</button><button id="previous" class="icon-btn" title="上一步 (←)" aria-label="上一步">‹</button><button id="play" class="play-btn" aria-label="播放动画"><span id="play-icon" aria-hidden="true">▶</span><span id="play-label">播放动画</span></button><button id="next" class="icon-btn" title="下一步 (→)" aria-label="下一步">›</button></div><div class="timeline" id="timeline" aria-label="选择动画步骤"></div><label class="speed-control"><span class="sr-only">播放速度</span><select id="speed" aria-label="播放速度"><option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option><option value="2">2×</option></select></label></div>
+        <div class="simulation-notes"><span>空格播放 / 暂停 · ← → 单步 · R 重置</span><span>首个 ARP 完整演示，后续邻居 MAC 假定已缓存。</span></div>
+      </section>
+      <div id="notice" class="notice" role="status" hidden></div>
+      <section id="teacher-notes" class="teacher-notes" hidden><div><span class="eyebrow">讲师准备</span><h3>讲完动画，再到 Packet Tracer 验证。</h3><ol id="lesson-tasks"></ol></div><div><span class="mini-label">配置与检查命令</span><pre id="lesson-command"></pre><p class="small-note">按设备分段执行；# 开头是说明，不是设备命令。不要将整段粘贴到同一台设备。</p><button class="text-btn" id="copy-command">复制参考步骤</button></div></section>
+      <section id="study-guide" class="study-guide" aria-label="学习与授课讲义">
+        <div class="study-heading"><div><span class="eyebrow">LEARN → EXPLAIN → BUILD</span><h3>把这一课学懂，也讲清楚。</h3></div><span class="study-caption">配合上方动画使用</span></div>
+        <div class="study-tabs" role="tablist" aria-label="学习讲义类型"><button id="tab-concepts" role="tab" data-study="concepts" aria-selected="true" aria-controls="study-content">先学懂</button><button id="tab-teach" role="tab" data-study="teach" aria-selected="false" aria-controls="study-content" tabindex="-1">怎样讲给学生</button><button id="tab-lab" role="tab" data-study="lab" aria-selected="false" aria-controls="study-content" tabindex="-1">动手做实验</button></div>
+        <div id="study-content" role="tabpanel" aria-labelledby="tab-concepts" tabindex="0"></div>
+      </section>
+      <section class="learning-cards"><div class="goal-card"><span class="eyebrow">这一课，你要带走</span><h3>看懂，再动手。</h3><ul id="lesson-goals"></ul><div class="practice-note"><span aria-hidden="true">↗</span><p>动画帮助解释原理。实际设备配置、连通性检查和实验提交，请在 Packet Tracer 中完成。</p></div></div><div class="challenge-card"><div class="challenge-heading"><span class="eyebrow">暂停一下 · 先预测</span><span class="challenge-label">小测验</span></div><h3 id="challenge-question"></h3><div id="challenge-options"></div><p id="challenge-feedback" role="status" hidden></p></div></section>
+      <footer><span>网络动画实验室 · EE6108 Workshop</span><div><a href="https://www.cisco.com/c/en/us/support/docs/ip/routing-information-protocol-rip/13790-8.html" target="_blank" rel="noreferrer">子网参考 ↗</a><a href="https://www.cisco.com/c/en/us/td/docs/routers/ios-xe/ip-routing/b-ip-routing/m_iri-iprouting.html" target="_blank" rel="noreferrer">路由参考 ↗</a></div></footer>
+    </main>
+  </div>
+  <dialog id="device-dialog"><button class="dialog-close icon-btn" aria-label="关闭设备配置">×</button><span class="eyebrow">设备配置</span><h2 id="device-title"></h2><div id="device-info"></div><p class="small-note">这是教学拓扑中的示例配置。</p></dialog>
+  <noscript>请启用 JavaScript 以播放网络动画。</noscript>
+</body>
+</html>

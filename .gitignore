@@ -1,0 +1,8 @@
+.env
+.env.*
+__pycache__/
+*.pyc
+network-workshop-offline.html
+.openai/
+.sites-runtime/
+*.tar.gz
