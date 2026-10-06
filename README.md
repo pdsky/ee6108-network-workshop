@@ -1,8 +1,23 @@
-# 网络动画实验室 · EE6108
+# 网络动画实验室与校园授权课堂 · EE6108
 
-一套中文网络工作坊学习与授课网页。用同一个小型校园案例，学习子网划分、ARP、交换、默认网关、静态路由与基本排错。
+两套中文网络工作坊学习与授课网页：基础五课讲解子网、ARP、交换、网关与静态路由；校园授权六课讲解学生区、教师区、VLAN、ACL，以及只给一名学生开放实验网站。
 
-## 学习顺序
+## 校园网络授权六课
+
+入口：`dist/campus.html`。页面顶部直接提供 **知识讲解、动画与授权、Packet Tracer 步骤、本课测验** 四个入口。
+
+1. **校园分区**：学生、教师、服务器、管理设备分别放入四个 VLAN，先写访问需求。
+2. **地址规划**：为四个区域分配子网，用容量练习验证终端和网关的地址需求。
+3. **VLAN 与单臂路由**：区分 access、trunk 和 R1 子接口，观察 CORE→R1→CORE 的路径。
+4. **ACL 规则**：按来源、目的、协议和端口筛选，第一条匹配决定许可或拒绝。
+5. **教师授权与撤销**：只开放 Student-A `.11` 到实验网站 `.101` 的 TCP 80；B、ping、SSH 仍被拒绝。
+6. **故障排查**：比较 ACL 顺序错误、服务器 VLAN 路径中断和 HTTP 服务关闭。
+
+每课都有通俗解释、授课话术、设备配置步骤和两道测验，共 12 题。动画可以暂停、单步、调整速度、查看设备地址，并显示当前首条 ACL 匹配和 A/B 对照结果。
+
+建议演示：选择实验网站 → 授权 A → 切换 B → 切换 ping → 撤销 A；随后尝试三种故障并解释失败的位置。
+
+## 基础网络五课
 
 1. **地址规划**：IP、子网掩码、可用地址与 VLSM；用容量滑块比较 /24–/30。
 2. **同区通信**：ARP 查询目标 MAC，交换机学习源 MAC，观察 ICMP 请求与回复。
@@ -29,15 +44,36 @@
 python3 -m http.server 4318 --bind 127.0.0.1 --directory dist
 ```
 
-浏览器打开 `http://127.0.0.1:4318`。网页使用 ES modules，在线版本需要 HTTP 服务器。
+浏览器打开 `http://127.0.0.1:4318/campus.html` 进入校园授权课堂，或打开 `http://127.0.0.1:4318/` 进入基础五课。网页使用 ES modules，源码版通过 HTTP 服务器运行。
 
-生成可直接双击打开、无需网络的单文件版本：
+## 离线演示
+
+下载仓库 ZIP 并解压，在 `offline/` 中用浏览器打开：
+
+- [校园网络授权-学习网站.html](offline/校园网络授权-学习网站.html)：校园授权六课。
+- [网络动画实验室-离线版.html](offline/网络动画实验室-离线版.html)：基础网络五课。
+
+两个文件放在同一目录时，可用网页入口相互切换。GitHub 的 HTML 文件预览展示源码；请下载后用浏览器打开，或使用上面的本地服务器。
+
+从源码重新生成两份单文件网页：
 
 ```sh
-python3 scripts/build-offline.py --output network-workshop-offline.html
+python3 scripts/build-offline.py --page campus --output "offline/校园网络授权-学习网站.html"
+python3 scripts/build-offline.py --page foundation --output "offline/网络动画实验室-离线版.html"
 ```
 
-## 地址规划
+## 校园授权课地址规划
+
+| 区域 | VLAN | 子网 | 掩码 | 网关 | 示例设备 |
+| --- | --- | --- | --- | --- | --- |
+| 学生 | 10 | 192.168.10.0/26 | 255.255.255.192 | .1 | Student-A .11；Student-B .12 |
+| 教师 | 20 | 192.168.10.64/27 | 255.255.255.224 | .65 | Teacher-A .66；Teacher-B .67 |
+| 服务器 | 30 | 192.168.10.96/28 | 255.255.255.240 | .97 | PUBLIC .100；LAB .101 |
+| 管理 | 99 | 192.168.10.112/28 | 255.255.255.240 | .113 | AUTH-PC .114；交换机 .115–.117 |
+
+`.x` 简写均以 `192.168.10` 开头。校园课的四个 VLAN 直接连接 R1，无需静态路由。下面的基础课使用双路由器拓扑与不同的管理/链路规划，搭实验时选定一套，避免混用地址与接口命令。
+
+## 基础五课地址规划
 
 | 用途 | 子网 | 掩码 | 网关／接口 |
 | --- | --- | --- | --- |
@@ -48,7 +84,15 @@ python3 scripts/build-offline.py --output network-workshop-offline.html
 
 每区两台电脑仅代表实际规划容量。R1 需要至少三个可用以太网接口，具体端口名称以所选设备为准。操作指南中的尖括号接口名必须替换为真实接口；`#` 开头为说明，按设备分段执行命令。
 
-## 教学边界
+## 校园授权课的教学边界
+
+授权按钮仅修改网页教学模型，不会配置真实网络或 Packet Tracer。教师在本实验中兼任网络管理员，通过专用 AUTH-PC SSH 到 R1 `.113` 修改 ACL；普通教师电脑不自动获得设备管理权限。
+
+许可按固定源 IP 匹配，不认证真实学生身份，也不提供网页审批或自动到期。服务器留在独立 VLAN；同 VLAN 流量通常不经过路由入口 ACL。HTTP 许可不等于 ping 许可。撤销后应测试新请求，已显示、缓存或下载的内容不会自动消失。
+
+实际设备命令及对应 `.pkt` 尚需在所选 Packet Tracer 设备上预实验；讲义提供 ACL 序号方式及完整清单切换备选。按老师要求保存未授权、A 授权、撤销三份 `.pkt` 和访问测试证据。
+
+## 基础五课的教学边界
 
 这是概念动画，并非完整网络模拟器。正式设备配置与连通性验证需要在 Packet Tracer 中完成并保存为 `.pkt`。首次 ARP 显式播放，后续必要邻居条目假定已缓存；MAC 以设备／接口标签表示。示例初始 TTL 为 64，不包含 NAT。
 
@@ -62,12 +106,20 @@ python3 scripts/build-offline.py --output network-workshop-offline.html
 - `dist/model.js`：正确路径、故障路径、IP／MAC／TTL 解释。
 - `dist/lessons.js`：五课目标、任务、地址表和测验。
 - `dist/study.js`：基础知识、讲解话术、实操与验收。
-- `scripts/build-offline.py`：离线 HTML 打包。
+- `dist/campus.html` / `campus.css`：校园课堂页面与响应式布局。
+- `dist/campus.js`：六课导航、授权操作、动画、测验和可选浏览器教学工具。
+- `dist/campus-model.js`：精确 ACL 匹配、授权生命周期及故障路径模型。
+- `dist/campus-lessons.js`：六课讲义、授课话术、命令与 12 道测验。
+- `offline/`：可直接打开的两份单文件网页。
+- `scripts/build-offline.py`：基础课与校园课的离线 HTML 打包。
 
 ## 参考资料
 
-基础技术解释参考 Cisco 官方文档：
+技术解释参考 Cisco 官方文档：
 
+- [Packet Tracer Features](https://tutorials.ptnetacad.net/help/default/intro.htm)
+- [Configure IP Access Lists](https://www.cisco.com/c/en/us/support/docs/security/ios-firewall/23602-confaccesslists.html)
+- [Router-on-a-stick Inter-VLAN Routing Lab](https://contenthub.netacad.com/courses/srwe-dl/_common/4.2.8-lab---configure-router-on-a-stick-inter-vlan-routing.pdf)
 - [Host and Subnet Quantities](https://www.cisco.com/c/en/us/support/docs/ip/routing-information-protocol-rip/13790-8.html)
 - [Basic IP Routing](https://www.cisco.com/c/en/us/td/docs/routers/ios-xe/ip-routing/b-ip-routing/m_iri-iprouting.html)
 - [Address Resolution Protocol](https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/ipaddr_arp/configuration/15-s/arp-15-s-book/Configuring-Address-Resolution-Protocol.html)
