@@ -3,373 +3,752 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#123c39">
-  <meta name="description" content="用校园网络动画学习子网、VLAN、ACL，以及只给一名学生开放实验网站的授权与撤销。附 Packet Tracer 步骤和逐课测验。">
+  <meta name="description" content="学生、教师、访客三类访问者，五个 VLAN 与三个网站；学习公开访问、部分网站授权和撤销。附 Packet Tracer 步骤与测验。">
   <title>校园网络课堂 · 从分区到授权</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23123c39'/%3E%3Cpath d='M16 32h32M32 16v32' stroke='%23bceda0' stroke-width='5'/%3E%3Ccircle cx='32' cy='32' r='7' fill='%23bceda0'/%3E%3C/svg%3E">
   <style>
 :root{--ink:#152f36;--muted:#50676e;--green:#123c39;--accent:#bceda0;--border:#dce5e7;--paper:#f5f8f9;--success:#116644;--danger:#a73c38;--amber:#88550a;color-scheme:light;font-family:Inter,"Noto Sans CJK SC","Microsoft YaHei",system-ui,sans-serif;font-size:16px;color:var(--ink);background:var(--paper)}*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button,a,select{touch-action:manipulation}button{cursor:pointer;border:1px solid var(--border);background:white;border-radius:8px;padding:10px 15px;line-height:1.4;color:var(--ink);font-size:.9rem;font-weight:650}button:hover:not(:disabled){border-color:var(--green);background:#edf4f0}button:disabled{opacity:.45;cursor:default}button.primary{background:var(--green);color:white;border-color:var(--green)}button.primary:hover:not(:disabled){background:#1b5550}a{color:var(--green);text-underline-offset:4px}button:focus-visible,a:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid #3987c0;outline-offset:3px}h1,h2,h3,h4,p{margin:0}p{line-height:1.75}h2{font-size:clamp(1.5rem,2vw,2rem);letter-spacing:-.03em;line-height:1.3}h3{font-size:1.16rem;line-height:1.4}small{font-size:.8rem}.eyebrow{font-size:.8rem;letter-spacing:.08em;font-weight:750;color:var(--muted)}[hidden]{display:none!important}.skip-link{position:absolute;left:10px;top:-100px;z-index:100;background:white;padding:15px}.skip-link:focus{top:10px}.topbar{height:84px;display:flex;align-items:center;justify-content:space-between;padding:0 32px;border-bottom:1px solid var(--border);background:white;gap:20px}.brand{display:flex;align-items:center;gap:12px;text-decoration:none;font-weight:750;font-size:1.08rem}.brand small{display:block;font-size:.75rem;letter-spacing:.1em;margin-top:4px;color:var(--muted);font-weight:550}.brand-mark{width:40px;height:40px;background:var(--green);color:var(--accent);display:grid;place-items:center;border-radius:11px;font-weight:800}.top-actions{display:flex;gap:22px;align-items:center}.foundation-link{font-size:.9rem}.workspace{display:grid;grid-template-columns:260px minmax(0,1fr);min-height:calc(100vh - 84px)}.sidebar{background:var(--green);color:white;padding:30px 20px}.sidebar-title{padding:0 9px 25px}.sidebar .eyebrow{color:var(--accent)}.sidebar h1{font-size:1.68rem;line-height:1.4;margin:14px 0;letter-spacing:-.04em}.sidebar p{font-size:.9rem;color:#c3d8d4;line-height:1.75}.sidebar nav{display:grid;gap:7px}.lesson-button{display:flex;text-align:left;align-items:center;gap:12px;border:1px solid transparent;background:transparent;color:#e8f4ef;padding:12px;width:100%}.lesson-button span{font-size:.84rem;color:#a7c5bc}.lesson-button div{font-size:1rem;line-height:1.5}.lesson-button small{display:block;font-size:.8rem;margin-top:3px;color:#a7c5bc}.lesson-button.selected{background:var(--accent);color:var(--green)}.lesson-button.selected span,.lesson-button.selected small{color:#37613f}.lesson-button:hover:not(:disabled){border-color:#79a395;background:#28544c}.lesson-button.selected:hover{background:#c8f3b3}.sidebar-tip{border-top:1px solid #41665e;margin:25px 8px 0;padding-top:20px;font-size:.9rem}.sidebar-tip p{margin-top:7px}main{padding:26px 30px 24px;min-width:0;max-width:1800px;width:100%;margin:auto}.lesson-heading{display:flex;align-items:center;justify-content:space-between;gap:30px;margin-bottom:22px}.lesson-heading h2{margin:7px 0 10px}.lesson-heading p{color:var(--muted);max-width:850px}.module-tag{font-size:.8rem;background:#e6eee9;padding:8px 12px;border-radius:6px;white-space:nowrap}.view-tabs{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--border);background:white;padding:5px;border-radius:11px;gap:5px;margin-bottom:20px}.view-tabs button{border:none;background:transparent;font-size:.96rem;padding:12px 8px}.view-tabs button[aria-selected=true]{background:var(--green);color:white}.demo-controls{display:grid;grid-template-columns:1fr 1.2fr 1.15fr 1.45fr;gap:12px;margin-bottom:16px}label{font-size:.88rem;font-weight:650;display:block}select{display:block;width:100%;margin-top:7px;border:1px solid #c7d4d8;padding:11px 9px;background:white;border-radius:7px;color:var(--ink);font-size:.9rem;min-height:44px}.authorization{padding:18px 22px;background:#e9f3e4;border:1px solid #cfdfc5;display:flex;align-items:center;justify-content:space-between;gap:20px;border-radius:11px;margin-bottom:18px}.authorization h3{margin:6px 0;font-size:1.05rem}.authorization p{font-size:.9rem;color:#43614c}.grant-buttons{display:flex;gap:9px;flex-shrink:0}.demo-grid{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:16px}.network-card,.step-card{border:1px solid var(--border);border-radius:12px;background:white;min-width:0;overflow:hidden}.card-top{padding:18px 20px 7px;display:flex;align-items:center;justify-content:space-between;gap:12px}.card-top h3{font-size:1rem}.card-top>span{font-size:.8rem;color:var(--muted)}.diagram-scroll{overflow-x:auto}#network{display:block;width:100%;min-width:620px;height:auto;max-height:500px}.zone-label{fill:#536670;font-size:17px;font-weight:700}.node{cursor:pointer}.node rect{fill:white;stroke:#bccfd2;stroke-width:1.8}.node text{fill:var(--ink);font-size:17px;font-weight:650;pointer-events:none}.node .node-ip{font-size:14px;font-weight:500;fill:#50666b}.node.switch rect{fill:#eff3f4}.node.router rect{fill:var(--green);stroke:var(--green)}.node.router text{fill:white}.node.active rect{stroke:#21895c;stroke-width:4}.node:focus{outline:none}.node:focus rect{stroke:#3987c0;stroke-width:4}.diagram-foot{display:flex;justify-content:space-between;gap:10px;font-size:.8rem;color:var(--muted);padding:12px 20px;border-top:1px solid #edf1f2}.step-card{padding:22px;display:flex;flex-direction:column;gap:14px}.step-card h3{font-size:1.2rem}.step-card p{font-size:1rem}.step-card pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.88rem;line-height:1.7;padding:13px;background:#f1f5f6;color:#315562;border-radius:7px;margin:0;font-family:ui-monospace,SFMono-Regular,Consolas,monospace}.current-result{padding:13px;background:#fff0ed;border-radius:8px;border-left:3px solid var(--danger);margin-top:auto}.current-result.success{background:#e9f6ec;border-color:var(--success)}.current-result.warning{background:#fff4df;border-color:var(--amber)}.current-result b{display:block;font-size:.95rem}.current-result p{font-size:.9rem;margin-top:5px;color:#54696d}.playback{display:flex;align-items:center;gap:20px;padding:16px 0}.playback-buttons{display:flex;gap:7px}.timeline{display:flex;gap:5px;flex:1;min-width:100px}.timeline button{height:10px;min-width:9px;padding:0;border:0;background:#cfdbde;border-radius:4px;flex:1}.timeline button.current{background:var(--green)}.timeline button.past{background:#82bc96}.speed-label{display:flex;align-items:center;gap:9px;white-space:nowrap;font-size:.8rem}.speed-label select{margin:0;width:78px;padding:8px}.model-note{font-size:.8rem;color:var(--muted);margin-bottom:18px}.comparison{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}.comparison-card{padding:20px;border:1px solid var(--border);background:white;border-radius:10px;display:grid;grid-template-columns:1fr auto;gap:8px}.comparison-card p{grid-column:1/-1;font-size:.92rem;color:var(--muted)}.status-badge{font-size:.84rem;font-weight:700;padding:5px 10px;background:#fff0ed;color:var(--danger);border-radius:6px}.status-badge.success{background:#e5f4e9;color:var(--success)}.policy-card{border:1px solid var(--border);padding:18px 22px;border-radius:10px;background:white}.policy-card summary{font-weight:700;cursor:pointer;font-size:1rem}.policy-card p{font-size:.88rem;color:var(--muted);margin-top:14px}.policy-row{display:grid;grid-template-columns:42px 1fr auto;gap:12px;padding:13px 10px;border-bottom:1px solid #e7eded;align-items:center;font-size:.86rem}.policy-row code{overflow-wrap:anywhere;line-height:1.6}.policy-row.match{background:#edf5df;border-radius:6px;box-shadow:inset 3px 0 var(--green)}.policy-row span:last-child{font-size:.8rem;color:var(--muted)}.course-navigation{display:flex;align-items:center;justify-content:space-between;gap:20px;border-top:1px solid var(--border);padding-top:22px;margin-top:26px}.course-navigation p{max-width:700px;font-size:.94rem;color:var(--muted)}footer{margin-top:30px;font-size:.8rem;color:var(--muted);border-top:1px solid var(--border);padding-top:18px;display:flex;justify-content:space-between;gap:20px}footer p{font-size:.8rem}footer div{display:flex;gap:18px;flex-wrap:wrap}dialog{border:1px solid var(--border);border-radius:14px;padding:30px;max-width:580px;width:calc(100% - 32px)}dialog::backdrop{background:#0d252866}dialog h2{margin:12px 0 20px}.close{float:right}noscript{display:block;padding:20px;background:#fff0d0}.presentation .sidebar{display:none}.presentation .workspace{grid-template-columns:1fr}.presentation main{max-width:1600px}.presentation .lesson-heading{margin-bottom:16px}.presentation .module-tag{display:none}@media(max-width:1250px){.workspace{grid-template-columns:220px minmax(0,1fr)}.sidebar{padding:25px 14px}main{padding:24px 22px}.module-tag{display:none}.demo-grid{grid-template-columns:minmax(0,1fr) 245px}.step-card{padding:18px}.demo-controls{grid-template-columns:1fr 1fr}.authorization{align-items:flex-start}.grant-buttons{flex-direction:column}.card-top{align-items:flex-start;flex-direction:column}}@media(max-width:950px){.workspace{grid-template-columns:1fr}.sidebar{padding:15px 20px}.sidebar-title,.sidebar-tip{display:none}.sidebar nav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.lesson-button{padding:8px}.lesson-button small{display:none}.lesson-button div{font-size:.9rem}.topbar{padding:15px 20px;height:auto}.top-actions{gap:14px}.demo-grid{grid-template-columns:1fr}.step-card{display:grid;grid-template-columns:1fr 1fr;gap:10px 20px}.step-card .eyebrow,.step-card h3,.step-card>p{grid-column:1/-1}#network{max-height:470px}.current-result{margin:0}.playback{flex-wrap:wrap}.timeline{order:3;flex-basis:100%}.course-navigation p{font-size:.88rem}footer{flex-direction:column}.presentation .step-card{display:block}.presentation .step-card>*{margin-bottom:12px}}@media(max-width:600px){main{padding:22px 16px}.topbar{padding:13px 16px}.brand{font-size:1rem;gap:8px}.brand small{font-size:.65rem}.brand-mark{width:34px;height:34px}.top-actions{gap:5px}.foundation-link{display:none}.top-actions button{font-size:.8rem;padding:8px}.sidebar{padding:12px}.lesson-button{gap:6px}.lesson-button span{font-size:.75rem}.lesson-button div{font-size:.82rem}.view-tabs{grid-template-columns:1fr 1fr}.view-tabs button{font-size:.9rem}.lesson-heading p{font-size:.94rem}.demo-controls{gap:10px}.demo-controls label{font-size:.8rem}.demo-controls select{font-size:.82rem}.authorization{flex-direction:column;padding:16px}.grant-buttons{flex-direction:row}.step-card{display:flex;padding:18px}.comparison{grid-template-columns:1fr}.policy-card{padding:15px}.policy-row{grid-template-columns:26px 1fr;gap:7px}.policy-row span:last-child{grid-column:2}.course-navigation{flex-wrap:wrap}.course-navigation p{order:3;flex-basis:100%}.playback{gap:10px}.playback-buttons{width:100%;justify-content:space-between}.playback-buttons button{padding:9px 11px}.speed-label{margin-left:auto}.dialog-foot{font-size:.75rem}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 .concept-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.concept-card{background:white;border:1px solid var(--border);border-radius:11px;padding:24px;position:relative}.concept-number{font-size:.8rem;color:#708790;font-weight:700;display:block;margin-bottom:12px}.concept-card h3{margin-bottom:12px}.concept-card>p{color:var(--muted)}.example{margin-top:18px;background:#f0f6ed;border-left:3px solid #87b868;padding:14px 16px;border-radius:4px}.example>b{font-size:.84rem;color:#436435}.example p{font-size:.94rem;margin-top:5px}.teaching-card{margin-top:20px;padding:22px 25px;background:var(--green);color:white;border-radius:11px}.teaching-card summary{cursor:pointer;font-weight:700;font-size:1.07rem}.teaching-card ol{padding-left:23px;line-height:1.9;margin:18px 0}.teaching-card li{margin-bottom:8px}.teaching-card p{font-size:.9rem;color:#c6ddd4}.policy-matrix,.route-explanation,.address-exercise{border:1px solid var(--border);background:white;padding:24px;border-radius:11px;margin-top:20px}.route-explanation p{margin:12px 0 16px;color:var(--muted)}.policy-matrix>p{font-size:.9rem;color:var(--muted);margin-top:12px}.table-scroll{overflow-x:auto;margin-top:15px;border-radius:7px;border:1px solid var(--border);background:white}table{border-collapse:collapse;width:100%;text-align:left;font-size:.88rem;line-height:1.6}caption{text-align:left;padding:13px 16px;font-size:.84rem;color:var(--muted);background:#f0f5f6}th,td{padding:12px 16px;border-bottom:1px solid #e2eaed;white-space:nowrap}thead{background:#e9f0ed}tbody tr:last-child>*{border-bottom:0}.capacity-controls{display:grid;grid-template-columns:140px 150px 1fr;gap:20px;align-items:end;margin-top:20px}.capacity-controls input{width:100%;font:inherit;padding:11px 9px;border:1px solid #c7d4d8;border-radius:7px;margin-top:7px;min-height:44px}.address-exercise>div>p{color:var(--muted);margin-top:12px}.capacity-result{padding:15px;border-radius:8px;background:#eaf4e6;font-size:.94rem}.capacity-result p{font-size:.9rem}.capacity-result.insufficient{background:#fff0ed}.lab-intro,.quiz-intro{background:#e9f0ed;border-radius:10px;padding:22px 25px}.lab-intro h3,.quiz-intro h3{margin:8px 0}.lab-intro p,.quiz-intro p{color:var(--muted)}.lab-steps{padding:0;list-style:none;margin:20px 0;display:grid;gap:18px}.lab-step{border:1px solid var(--border);border-radius:10px;padding:24px;background:white}.lab-step-heading{display:flex;align-items:center;gap:12px;margin-bottom:15px}.lab-step-heading h3{flex:1}.step-number{display:grid;place-items:center;width:32px;height:32px;border-radius:8px;background:var(--green);color:var(--accent);font-size:.88rem;font-weight:750;flex-shrink:0}.lab-step>p{color:var(--muted)}.lab-step pre{background:#142c35;color:#dcefea;border-radius:8px;padding:20px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.9rem;line-height:1.7;overflow-x:auto;max-height:480px;tab-size:2;margin:18px 0 0}.copy-command{font-size:.83rem;padding:8px 12px}.lab-step .copy-feedback{margin-top:8px;font-size:.88rem;color:var(--success)}.copy-feedback:empty{display:none}.lab-boundary{padding:22px;border-left:4px solid #8db071;background:#edf5e8;border-radius:8px}.lab-boundary p{margin-top:8px;font-size:.94rem}.quiz-list{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:20px 0}.quiz-card{border:1px solid var(--border);border-radius:12px;background:white;padding:26px}.quiz-card h3{margin:14px 0 20px;font-size:1.22rem;line-height:1.6}.quiz-options{display:grid;gap:10px}.quiz-options button{text-align:left;display:flex;gap:12px;align-items:flex-start;padding:14px;font-size:1rem;font-weight:500;line-height:1.6}.quiz-options button>span{font-size:.85rem;display:grid;place-items:center;min-width:25px;min-height:25px;background:#edf2f3;border-radius:5px;font-weight:700}.quiz-options button.correct{border-color:#71a275;background:#edf7ed}.quiz-options button.incorrect{border-color:#c47b76;background:#fff1ed}.quiz-feedback{padding:14px 16px;margin-top:18px;border-radius:7px;font-size:.97rem}.quiz-feedback.correct{background:#e9f5e7;color:#255a37}.quiz-feedback.incorrect{background:#fff1e6;color:#77532c}.quiz-score{font-size:.94rem;color:var(--muted)}.device-properties{display:grid;grid-template-columns:140px 1fr;gap:12px;margin:20px 0;font-size:.94rem}.device-properties dt{font-weight:700}.device-properties dd{margin:0;overflow-wrap:anywhere}.model-note{line-height:1.7}.presentation .concept-grid{grid-template-columns:repeat(2,1fr)}@media(max-width:1150px){.concept-grid,.quiz-list{grid-template-columns:1fr}.capacity-controls{grid-template-columns:1fr 1fr}.capacity-result{grid-column:1/-1}}@media(max-width:600px){.concept-card,.quiz-card,.lab-step{padding:20px}.lab-step-heading{flex-wrap:wrap}.copy-command{margin-left:44px}.lab-intro,.quiz-intro,.policy-matrix,.route-explanation,.address-exercise{padding:20px}.teaching-card{padding:20px}.device-properties{grid-template-columns:105px 1fr}.presentation .concept-grid{grid-template-columns:1fr}.quiz-card h3{font-size:1.1rem}}
 
+/* Three visitor roles and per-website permissions. */
+.baseline-policy{display:flex;gap:10px 20px;flex-wrap:wrap;padding:12px 16px;margin-bottom:14px;border:1px solid #d5e3d9;border-radius:8px;background:#eff6ed;font-size:.88rem;color:#365846}.baseline-policy span:first-child{font-weight:750}.authorization{display:grid;grid-template-columns:minmax(220px,1fr) minmax(450px,1.4fr);align-items:start}.grant-scope{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}.grant-scope .grant-buttons{grid-column:1/-1;flex-direction:row;flex-wrap:wrap;justify-content:flex-start}.grant-context p{max-width:480px}.comparison{display:block}.comparison .table-scroll{margin-top:0}.access-matrix{background:white}.access-matrix th{font-size:.9rem}.matrix-result{min-width:90px;font-size:.88rem;border:1px solid transparent;font-weight:700;padding:7px 14px}.matrix-result.success{color:#185d3d;background:#e8f5e7}.matrix-result.denied{color:#9c3e35;background:#fff0e9}.matrix-result.warning{color:#7d561b;background:#fff3d9}.matrix-result:hover:not(:disabled){border-color:currentColor}.matrix-note{font-size:.88rem;color:var(--muted);margin-top:12px}#network{min-width:900px;max-height:560px}.node text{font-size:22px}.node .node-ip{font-size:20px}.zone-label{font-size:22px}.step-details{font-size:.92rem;color:var(--muted)}.step-details summary{cursor:pointer;font-weight:650;padding:8px 0}.step-details pre{margin-top:8px}.playback{padding:0 0 18px}.step-card{align-self:stretch}.step-card .current-result{margin-top:auto}#comparison{margin-top:20px}@media(max-width:1300px){.authorization{grid-template-columns:1fr;gap:14px}.grant-scope{grid-template-columns:1fr 1fr auto;align-items:end}.grant-scope .grant-buttons{grid-column:auto;flex-direction:column}}@media(max-width:950px){.grant-scope{grid-template-columns:1fr 1fr}.grant-scope .grant-buttons{grid-column:1/-1;flex-direction:row}.step-details{grid-column:1}.step-card .current-result{margin-top:0}.step-details pre{font-size:.9rem}#network{max-height:560px}}@media(max-width:600px){.authorization{display:grid;gap:16px}.grant-scope{width:100%;gap:10px}.grant-scope select{font-size:.85rem}.grant-scope .grant-buttons{flex-direction:row}.grant-buttons button{font-size:.85rem;padding:10px}.baseline-policy{font-size:.82rem;gap:5px}.baseline-policy span{display:block;width:100%}.access-matrix th,.access-matrix td{padding:12px 10px}.matrix-result{min-width:70px;font-size:.82rem;padding:7px 8px}.diagram-foot{font-size:.75rem}.step-card .current-result{margin-top:10px}}
+
 </style>
   <script type="module">
-// 原创教学讲义。CLI 按新建 Packet Tracer 实验编写，尚未完成对应 .pkt 预实验。
+// 原创教学讲义。CLI 按新建 Packet Tracer 实验编写，命令与对应 .pkt 均尚未完成预实验。
+// 本文件仅提供教学数据；网站动画不能证明真实设备配置已验证。
 // 原理参考 Cisco：
 // https://www.cisco.com/c/en/us/support/docs/security/ios-firewall/23602-confaccesslists.html
 // https://www.cisco.com/c/en/us/support/docs/lan-switching/inter-vlan-routing/14976-50.html
 
 const CAMPUS_LESSONS = [
   {
-    id: 'zones', number: '01', title: '先把校园分成四个区', subtitle: '从需求到拓扑',
-    lead: '先决定谁能访问什么，再配置设备。我们的学校有学生、教师、教学服务器和专用管理终端四个区域。教师批准的是某台学生电脑访问某个实验网站的权限。',
+    id: 'zones', number: '01', title: '三类访问者，三个网站', subtitle: '从访问需求到五个网络区域',
+    lead: '学生、教师和访客都能打开公开网站 PUB。课程网站 COURSE 与实验网站 LAB 默认只有教师能打开；教师可以给某台学生或访客电脑单独开放其中一个网站，也可以分别撤销。先把这张访问表写清楚，再搭建网络。',
     concepts: [
-      {title: '用一张访问表说明需求', body: '学生都能打开公共网站；实验网站需要授权；教师电脑和设备管理入口继续保护。普通教师可以使用两个教学网站。AUTH-PC 是授权教师专用的管理电脑。', example: '批准 Student-A 后，A 能打开实验网站，Student-B 仍不能打开。'},
-      {title: '拓扑中的每台设备做什么', body: '2960 交换机连接电脑并区分 VLAN。R1 为四个 VLAN 转发流量，再检查学生发来的跨区请求。两台服务器分别提供公共 HTTP 网站和受限 HTTP 网站。', example: '学生访问实验服务器：Student-A → STU-SW → CORE-SW → R1 → CORE-SW → 实验服务器。'},
-      {title: '理解本实验的“教师授权”', body: '课堂上由教师兼任网络管理员，通过 AUTH-PC 登录 R1 修改访问规则。许可按源 IP 地址识别电脑。网页审批、学生账号登录、自动到期需要另一个应用与身份系统。', example: '给 192.168.10.11 一条访问许可，不等于认证了真实学生姓名。'}
+      {title: '访问者类别与网络区域是两件事', body: '三类访问者分别是学生、教师、访客。网络划成五个 VLAN：学生 10、教师 20、服务器 30、访客 40、管理 99。AUTH 是教师在本实验中使用的专用管理终端，不是给普通教师电脑额外放行的理由。', example: 'Teacher-A 在 VLAN 20 使用三个网站；教师要修改许可时，转到 VLAN 99 的 AUTH 终端登录 R1。'},
+      {title: '把“能访问”具体到一个网站', body: 'PUB .100 提供公开资料，COURSE .102 提供课程资源，LAB .101 提供实验资源。这里所有网站都用 HTTP TCP 80。学生和访客默认只能使用 PUB；教师子网默认能使用三个网站。课程许可和实验许可彼此独立。', example: '只批准 Student-A 访问 COURSE：A 能打开 PUB 与 COURSE，仍不能打开 LAB；Student-B 和 Guest-1 仍只能打开 PUB。'},
+      {title: '教师授权在这里是固定 IP 许可', body: '教师在实验中兼任网络管理员，从 AUTH 登录 R1 修改 ACL。规则识别电脑的源 IP，不识别学生姓名或网页账号。没有网页审批、账号登录或自动到期；冒用被授权 IP 的风险也未由本实验解决。', example: '允许源 192.168.10.11 访问课程 HTTP，表示给这台固定 IP 电脑放行，并不等于认证了真实学生。'},
+      {title: '网络设备各司其职', body: '四台 2960 交换机连接终端并承载 VLAN；2911 路由器 R1 连接五个子网，并在学生、教师、访客入口分别检查访问清单。三个 Server 分别承载三个网站。普通教师的网站许可不会赋予控制学生电脑或任意 SSH 设备的能力。', example: 'Guest-1 → GUEST-SW → CORE-SW → R1 → CORE-SW → PUB。去 COURSE 的路径相同，但授权前会被访客入口 ACL 拒绝。'}
     ],
     teach: [
-      '先让学生说出自己属于哪一类，再问：这个角色应该能打开哪个网站？',
-      '把交换机讲成区域内的连接设备，把路由器讲成区域之间的入口。',
-      '请三位同学扮演学生 A、学生 B 和授权教师。A 提出申请，教师批准，B 是对照组。',
-      '强调授权后学生仍不能进入教师区或设备管理入口。'
+      '先请同学扮演学生 A、学生 B、教师与访客 G1，为三个网站填出默认成功或失败。',
+      '再加入一个申请：只给 A 开课程网站。请同学检查 A 的实验网站和 G1 的课程网站是否仍被拒绝。',
+      '区分三类使用者与五个网络区域，说明服务器和管理区域各自的作用。',
+      '明确普通教师电脑只获得三个网站 HTTP 许可；设备管理由 AUTH 终端承担。'
     ],
     lab: [
-      {title: '放置并命名 11 台设备', detail: '新建 Packet Tracer 文件，放 1 台 2911 路由器 R1、3 台 2960 交换机 CORE-SW / STU-SW / TCH-SW、5 台 PC 和 2 台 Server。PC 命名为 Student-A、Student-B、Teacher-A、Teacher-B、AUTH-PC；Server 命名为 PUBLIC-SRV、LAB-SRV。'},
-      {title: '按端口表连接骨干', detail: 'R1 G0/0 ↔ CORE-SW Fa0/1；CORE-SW G0/1 ↔ STU-SW G0/1；CORE-SW G0/2 ↔ TCH-SW G0/1。可使用自动选线。若型号接口编号不同，以实际接口替换后续命令，不要照搬编号。'},
-      {title: '连接终端', detail: 'STU-SW Fa0/1 接 Student-A，Fa0/2 接 Student-B；TCH-SW Fa0/1 接 Teacher-A，Fa0/2 接 Teacher-B；CORE-SW Fa0/2 接 PUBLIC-SRV，Fa0/3 接 LAB-SRV，Fa0/4 接 AUTH-PC。终端使用 FastEthernet0。'},
-      {title: '画出访问路径并保存', detail: '给四个区域加文字标签，记录授权前、授权后、撤销后三种预期。保存为 00_topology.pkt。绿灯表示链路状态，不能据此断定网站许可已经正确。'}
+      {title: '放置并命名 14 台设备', detail: '新建 Packet Tracer 文件，放 1 台 2911 R1、4 台 2960 CORE-SW / STU-SW / TCH-SW / GUEST-SW、6 台 PC 和 3 台 Server。PC 命名 Student-A、Student-B、Teacher-A、Teacher-B、AUTH、Guest-1；Server 命名 PUB、LAB、COURSE。命令和 .pkt 尚未完成预实验，请在所选 Packet Tracer 版本中逐项验证。'},
+      {title: '连接四条骨干链路', detail: 'R1 G0/0 ↔ CORE-SW Fa0/1；CORE-SW G0/1 ↔ STU-SW G0/1；CORE-SW G0/2 ↔ TCH-SW G0/1；CORE-SW Fa0/5 ↔ GUEST-SW G0/1。它们全部配置为 trunk。可用自动选线；若设备接口编号不同，先修正端口表再替换命令。'},
+      {title: '连接终端与服务器', detail: 'STU-SW Fa0/1 接 Student-A、Fa0/2 接 Student-B；TCH-SW Fa0/1 接 Teacher-A、Fa0/2 接 Teacher-B；GUEST-SW Fa0/1 接 Guest-1。CORE-SW Fa0/2 接 PUB、Fa0/3 接 LAB、Fa0/6 接 COURSE、Fa0/4 接 AUTH。终端使用 FastEthernet0。'},
+      {title: '绘制默认与部分授权访问表', detail: '默认：SA / SB / G1 的 PUB 成功，COURSE / LAB 失败；TA / TB 的三个网站全部成功。再记录“只授权 SA 的 COURSE”：只有 SA 的 COURSE 从失败变成功。给五个 VLAN 加标签，保存 00_topology.pkt；链路绿灯不表示 HTTP 许可已正确。'}
     ],
     questions: [
-      {question: '教师批准 Student-A 后，哪一种行为符合设计？', options: ['A 能打开实验网站，B 仍被拒绝', '所有学生都能管理路由器', 'A 能进入教师电脑的任何服务'], correctIndex: 0, explanation: '我们只给 A 开放实验网站 TCP 80。学生区对教师区与管理入口的限制继续生效。'},
-      {question: '为什么要留下 Student-B？', options: ['为了增加设备数量', '作为未授权对照，证明许可没有开放给所有人', '让它替教师修改配置'], correctIndex: 1, explanation: '只测 A 成功不能证明规则足够精确。B 继续失败，才说明没有把整个学生区一起放行。'}
+      {question: '教师只批准 Student-A 访问 COURSE，哪项符合设计？', options: ['A 的 COURSE 成功，A 的 LAB 与 G1 的 COURSE 仍失败', 'A 与所有访客都能打开三个网站', 'A 可以 SSH 登录 R1'], correctIndex: 0, explanation: '许可同时限定源电脑、目的服务器与 TCP 80。课程授权不开放实验网站，也不会传递给其他电脑。'},
+      {question: '普通 Teacher-A 默认能打开三个网站，是否表示它可以管理所有设备？', options: ['是，教师角色拥有任意网络服务权限', '否，三个 HTTP 许可与 AUTH 的 SSH 管理入口分开', '是，教师可以远程控制学生电脑'], correctIndex: 1, explanation: '教师入口 ACL 只开放三个网站 TCP 80 和本网关 ping。R1 的 SSH 来源另限制为 AUTH .114。'}
     ],
-    takeaway: '先把访问政策写清楚：谁、访问什么服务、在什么条件下允许。'
+    takeaway: '先写清楚谁能访问哪个网站；三类访问者、五个 VLAN、每台电脑的每个网站许可各自有边界。'
   },
   {
-    id: 'address', number: '02', title: '每个区有自己的地址', subtitle: '子网、掩码与默认网关',
-    lead: '把 192.168.10.0/24 按区域切开。学生电脑根据自己的 IP 和掩码判断目的地是否本地；目的地在另一个子网时，先交给默认网关。',
+    id: 'address', number: '02', title: '五个区域，五组地址', subtitle: '子网、掩码与默认网关',
+    lead: '把 192.168.10.0/24 切成互不重叠的学生、教师、服务器、管理和访客子网。电脑先根据 IP 与掩码判断目的地是否本地；跨子网时，把帧交给自己的默认网关。',
     concepts: [
-      {title: '地址规划要把网关算进去', body: '学生区预计 50 台终端，还需要 1 个网关地址。/26 有 64 个地址，其中 62 个通常可分配；/27 只有 30 个，容纳不了学生区。', example: '学生 VLAN 10：192.168.10.0/26；可用 .1–.62；广播 .63；网关 .1。'},
-      {title: '四个子网互不重叠', body: '教师区用 .64/27，可用 .65–.94，广播 .95；服务器区用 .96/28，可用 .97–.110，广播 .111；管理区用 .112/28，可用 .113–.126，广播 .127。所有简写都以 192.168.10 开头。', example: 'Student-A .11、Teacher-A .66 和 LAB-SRV .101 分属三个子网。'},
-      {title: '默认网关是本区的路由入口', body: '电脑和自己的默认网关必须在同一子网。学生去服务器区时，先找 .1 的 MAC，把帧交给 R1；IP 目的地址仍然是服务器 .101。', example: 'A 的配置：IP 192.168.10.11，掩码 255.255.255.192，网关 192.168.10.1。'}
+      {title: '容量计算要包含网关', body: '学生区预计 50 台终端，还需要 1 个网关，至少需要 51 个可用地址。/26 有 62 个通常可分配的地址；/27 只有 30 个，不能容纳该学生区。', example: 'VLAN 10：192.168.10.0/26，掩码 255.255.255.192，可用 .1–.62，广播 .63，网关 .1。'},
+      {title: '教师、服务器与管理地址', body: 'VLAN 20 用 .64/27，可用 .65–.94，广播 .95，网关 .65；VLAN 30 用 .96/28，可用 .97–.110，广播 .111，网关 .97；VLAN 99 用 .112/28，可用 .113–.126，广播 .127，网关 .113。所有简写都以 192.168.10 开头。', example: 'TA .66、TB .67；PUB .100、LAB .101、COURSE .102；AUTH .114、CORE .115、STU .116、TCH .117、GUEST-SW .118。'},
+      {title: '访客使用独立子网', body: 'VLAN 40 用 192.168.10.128/27，掩码 255.255.255.224。网络地址 .128，通常可分配 .129–.158，广播 .159；网关占用 .129，Guest-1 使用 .130。剩余 .160–.255 留作后续规划，不属于本实验五个子网。', example: 'Guest-1：192.168.10.130 / 255.255.255.224，默认网关 192.168.10.129。'},
+      {title: '默认网关必须属于本网', body: '学生访问 Student-B .12 时通常直接走本地交换；访问 COURSE .102 或访客 .130 时，先找 .1 的 MAC。目的 IP 仍是目标电脑或服务器；路由器随后决定转发或拒绝。', example: 'Guest-1 去 PUB .100，第一跳帧交给 .129 的 MAC，不是直接寻找远端 PUB 的 MAC。'}
     ],
     teach: [
-      '把 IP 比作门牌，掩码决定哪些门牌属于本区，默认网关是离开本区的入口。',
-      '先问：50 台学生电脑加 1 个网关，一共需要多少可用地址？答案是 51。',
-      '让学生判断 .11 到 .12 是本地通信，.11 到 .101 则需要网关。'
+      '把 IP 讲成门牌，掩码定义本区范围，默认网关是离开本区的入口。',
+      '先计算学生 50 台终端加 1 个网关，再选 /26；不要只数 PC 而忘记网关。',
+      '请同学检查 .128 与 .159 为什么不能分给访客 PC，并说明 .129 已留给网关。',
+      '对比 SA 到 SB、SA 到 COURSE、G1 到 PUB 三条路径，找出何时需要 R1。'
     ],
     lab: [
-      {title: '填写学生和教师 IP', detail: 'PC → Desktop → IP Configuration → Static。Student-A：192.168.10.11，Student-B：192.168.10.12；二者掩码 255.255.255.192，网关 192.168.10.1。Teacher-A：192.168.10.66，Teacher-B：192.168.10.67；二者掩码 255.255.255.224，网关 192.168.10.65。'},
-      {title: '填写服务器和管理 IP', detail: 'PUBLIC-SRV：192.168.10.100，LAB-SRV：192.168.10.101；二者掩码 255.255.255.240，网关 192.168.10.97。AUTH-PC：192.168.10.114，掩码 255.255.255.240，网关 192.168.10.113。DNS 暂不填写，用完整 IP 打开网站。'},
-      {title: '检查地址与主机容量', detail: '网络地址 .0 / .64 / .96 / .112 和广播地址 .63 / .95 / .111 / .127 不能分给普通终端。网关留给 R1 子接口，终端不重复使用。管理交换机地址预留 .115 / .116 / .117。'},
-      {title: '先观察本地通信', detail: '在 Student-A 的 Desktop → Command Prompt 执行下面命令。交换机还未分 VLAN 时，两台学生 PC 在默认 VLAN 内可能已经互通。到默认网关的测试要等下一课配置 R1 后再做。首次 ARP 解析可能使第一次 ping 有丢包，复测并观察路径。', command: 'ipconfig\nping 192.168.10.12'}
+      {title: '填写学生和教师 IP', detail: 'PC → Desktop → IP Configuration → Static。Student-A .11、Student-B .12，掩码 255.255.255.192，网关 .1；Teacher-A .66、Teacher-B .67，掩码 255.255.255.224，网关 .65。每个地址都填写完整的 192.168.10.x。'},
+      {title: '填写三个服务器 IP', detail: 'PUB：192.168.10.100；LAB：192.168.10.101；COURSE：192.168.10.102。三台均用掩码 255.255.255.240、默认网关 192.168.10.97。DNS 暂不填写，后续用完整 IP URL 打开网站。'},
+      {title: '填写管理与访客 IP', detail: 'AUTH：192.168.10.114，掩码 255.255.255.240，网关 192.168.10.113。Guest-1：192.168.10.130，掩码 255.255.255.224，网关 192.168.10.129。交换机管理 SVI 在下一课配置为 CORE .115、STU .116、TCH .117、GUEST-SW .118。'},
+      {title: '检查地址表与本地通信', detail: '网络地址 .0 / .64 / .96 / .112 / .128 和广播地址 .63 / .95 / .111 / .127 / .159 不分给终端，五个网关不重复使用。Student-A 执行下面命令检查地址与同网通信；各本网关的测试留到下一课配置 R1 后。首次 ARP 解析可能导致首次 ping 丢包，需复测。', command: `ipconfig
+ping 192.168.10.12`}
     ],
     questions: [
-      {question: '学生区有 50 台终端，还需要网关。最小的合适子网是？', options: ['/27：30 个可用地址', '/26：62 个可用地址', '/28：14 个可用地址'], correctIndex: 1, explanation: '50 + 1 = 51 个可用地址，/26 的 62 个可用地址够用；另两个不够。'},
-      {question: 'Student-A 访问 192.168.10.101，第一跳的帧应交给谁？', options: ['Student-B 的 MAC', '服务器在远端 VLAN 的 MAC', '默认网关 192.168.10.1 的 MAC'], correctIndex: 2, explanation: '.101 不在 A 的 .0/26 子网内，A 先把帧交给本区网关。IP 目的地址保持为 .101。'}
+      {question: 'Guest-1 使用 .130/27，正确的默认网关与广播地址是？', options: ['网关 .1，广播 .63', '网关 .129，广播 .159', '网关 .128，广播 .158'], correctIndex: 1, explanation: '访客子网是 .128/27，.128 是网络地址，.159 是广播地址，规划的本网关为 .129。'},
+      {question: 'Student-A 访问 COURSE .102，第一跳帧应交给谁？', options: ['Student-B 的 MAC', '远端 COURSE 的 MAC', '默认网关 .1 的 MAC'], correctIndex: 2, explanation: '.102 不在 .11 所在的 .0/26 子网内。SA 把帧交给本网关；数据包的目的 IP 仍然是 .102。'}
     ],
-    takeaway: 'IP、掩码、默认网关三项必须配套；本网通信和跨网通信走的路径不同。'
+    takeaway: '五个子网互不重叠；每台终端的 IP、掩码、网关必须配套，网关也占用可用地址。'
   },
   {
-    id: 'vlan', number: '03', title: '把分区落到交换机上', subtitle: 'Access、Trunk 与单臂路由',
-    lead: 'VLAN 把交换网络划成不同的广播域。电脑端口用 access；多 VLAN 共用的交换机间链路和 R1 链路用 trunk。R1 用四个子接口担任四个区域的网关。',
+    id: 'vlan', number: '03', title: '把五个区域落到设备上', subtitle: '四台交换机与五个路由子接口',
+    lead: 'PC 与服务器端口用 access，多 VLAN 共用的骨干链路用 trunk。四台交换机都创建 VLAN 10、20、30、40、99；R1 用五个子接口提供五个网关。先验证无 ACL 的基础通信，再加访问政策。',
     concepts: [
-      {title: 'Access 端口接一种区域', body: '接 Student-A 的端口分到 VLAN 10，接教师电脑的端口分到 VLAN 20。普通 PC 不需要自己加 VLAN 标签，交换机根据接入端口识别区域。', example: 'STU-SW Fa0/1 与 Fa0/2：switchport access vlan 10。'},
-      {title: 'Trunk 带着 VLAN 标记传输', body: '一根 trunk 可以传多个 VLAN，802.1Q 标签帮助对端区分它们。需要的 VLAN 既要在交换机存在，也要被 trunk 允许通过。', example: '本方案允许 VLAN 10,20,30,99；2960 直接设置 switchport mode trunk，无需添加 trunk encapsulation 命令。'},
-      {title: '单臂路由把多个网关放在一根线', body: 'R1 G0/0.10 对应 VLAN 10，G0/0.20 对应 VLAN 20，依此类推。跨 VLAN 数据经过 R1；学生之间的同 VLAN 通信通常由交换机完成。', example: 'A 去实验网站：带 VLAN 10 标记进入 R1，再以 VLAN 30 从同一物理线返回 CORE-SW。'},
-      {title: '这里的网段都是直接连接', body: 'R1 四个子接口配置好且链路正常后，会出现对应的直连路由。核心方案无需配置静态路由，也没有互联网出口。先证明基础路径可用，再加访问限制。', example: '在尚未应用学生 ACL 的基线阶段，A 应能 ping 到 LAB-SRV .101。'}
+      {title: 'Access 端口确定终端区域', body: '学生接入口属于 VLAN 10，教师属于 VLAN 20，三个服务器属于 VLAN 30，访客属于 VLAN 40，AUTH 属于 VLAN 99。普通终端不需要自己加 VLAN 标签。', example: 'GUEST-SW Fa0/1：switchport mode access，然后 switchport access vlan 40。'},
+      {title: 'Trunk 要允许所有需要的 VLAN', body: 'R1 到 CORE 及 CORE 到三台接入交换机的四条骨干都用 trunk，允许列表都是 10,20,30,40,99。既要创建 VLAN，也要允许其经过相关 trunk。2960 直接配置 switchport mode trunk。', example: 'CORE-SW Fa0/5 到 GUEST-SW G0/1 也必须允许 VLAN 40 与管理 VLAN 99。'},
+      {title: '五个网关使用单臂路由', body: 'G0/0.10 / .20 / .30 / .40 / .99 分别用 encapsulation dot1Q 对应各 VLAN。跨 VLAN 流量进出 R1；同 VLAN 终端之间通常由交换机直接转发，不会经过 R1 的入口 ACL。', example: 'G1 去 PUB：VLAN 40 进入 R1，再通过 VLAN 30 返回 CORE-SW。'},
+      {title: '直连路由与交换机管理地址', body: '五个子接口配置且链路正常后，R1 自动形成五个直连网络，不需要添加静态路由。2960 的 VLAN 99 SVI 用于管理交换机；它不承担 VLAN 间路由。这里没有互联网出口。', example: 'show ip route 应显示五个直连子网；交换机 ip default-gateway 都指向 .113。'}
     ],
     teach: [
-      '让学生沿图走一次：先看 access 端口归属，再看 trunk 允许项，最后看 R1 子接口。',
-      '画一根 trunk，放上四种颜色的 VLAN 标签，说明共用物理链路不等于同一个广播域。',
-      '提醒学生：只创建 VLAN 名字不会产生跨 VLAN 路由，R1 子接口才是四个网关。'
+      '沿端口表走一次：先确认 access 归属，再检查四条 trunk，最后检查 R1 子接口。',
+      '在一条 trunk 上画五种 VLAN 标签，说明共享链路仍能保持不同广播域。',
+      '提醒学生：创建 VLAN 不会自动产生跨 VLAN 路由；五个网关由 R1 提供。',
+      '此课的无 ACL 测试用于证明路径可用，下一课的访问失败要对照政策判断。'
     ],
     lab: [
-      {title: '配置 CORE-SW', detail: '以下命令从设备 CLI 的用户模式开始。按第 01 课端口表连接后输入。管理 SVI 地址为 .115；它用于管理交换机，不承担 VLAN 间路由。', command: 'enable\nconfigure terminal\nhostname CORE-SW\nvlan 10\n name STUDENTS\nvlan 20\n name TEACHERS\nvlan 30\n name SERVERS\nvlan 99\n name MANAGEMENT\nexit\ninterface fa0/1\n switchport mode trunk\n switchport trunk allowed vlan 10,20,30,99\nexit\ninterface range g0/1 - 2\n switchport mode trunk\n switchport trunk allowed vlan 10,20,30,99\nexit\ninterface range fa0/2 - 3\n switchport mode access\n switchport access vlan 30\nexit\ninterface fa0/4\n switchport mode access\n switchport access vlan 99\nexit\ninterface vlan 99\n ip address 192.168.10.115 255.255.255.240\n no shutdown\nexit\nip default-gateway 192.168.10.113\nend\ncopy running-config startup-config'},
-      {title: '配置 STU-SW', detail: '学生电脑接 Fa0/1、Fa0/2；G0/1 上联 CORE-SW。管理 SVI 地址为 .116。', command: 'enable\nconfigure terminal\nhostname STU-SW\nvlan 10\n name STUDENTS\nvlan 20\n name TEACHERS\nvlan 30\n name SERVERS\nvlan 99\n name MANAGEMENT\nexit\ninterface range fa0/1 - 2\n switchport mode access\n switchport access vlan 10\nexit\ninterface g0/1\n switchport mode trunk\n switchport trunk allowed vlan 10,20,30,99\nexit\ninterface vlan 99\n ip address 192.168.10.116 255.255.255.240\n no shutdown\nexit\nip default-gateway 192.168.10.113\nend\ncopy running-config startup-config'},
-      {title: '配置 TCH-SW', detail: '教师电脑接 Fa0/1、Fa0/2；G0/1 上联 CORE-SW。管理 SVI 地址为 .117。', command: 'enable\nconfigure terminal\nhostname TCH-SW\nvlan 10\n name STUDENTS\nvlan 20\n name TEACHERS\nvlan 30\n name SERVERS\nvlan 99\n name MANAGEMENT\nexit\ninterface range fa0/1 - 2\n switchport mode access\n switchport access vlan 20\nexit\ninterface g0/1\n switchport mode trunk\n switchport trunk allowed vlan 10,20,30,99\nexit\ninterface vlan 99\n ip address 192.168.10.117 255.255.255.240\n no shutdown\nexit\nip default-gateway 192.168.10.113\nend\ncopy running-config startup-config'},
-      {title: '配置 R1 的四个网关', detail: '使用 2911 的 G0/0；其他型号需替换接口编号。物理接口必须 no shutdown。子接口编号便于阅读，真正的 VLAN 对应由 encapsulation dot1Q 指定。', command: 'enable\nconfigure terminal\nhostname R1\ninterface g0/0\n no ip address\n no shutdown\nexit\ninterface g0/0.10\n encapsulation dot1Q 10\n ip address 192.168.10.1 255.255.255.192\nexit\ninterface g0/0.20\n encapsulation dot1Q 20\n ip address 192.168.10.65 255.255.255.224\nexit\ninterface g0/0.30\n encapsulation dot1Q 30\n ip address 192.168.10.97 255.255.255.240\nexit\ninterface g0/0.99\n encapsulation dot1Q 99\n ip address 192.168.10.113 255.255.255.240\nend\nshow ip interface brief\nshow ip route\ncopy running-config startup-config'},
-      {title: '验证无 ACL 的基线', detail: '各 PC 先 ping 自己的网关。Student-A 再 ping .101；此阶段还未应用 ACL，应该可达。交换机执行 show vlan brief、show interfaces trunk。若失败，先修复 IP、端口 VLAN、trunk 与接口状态。保存 00_baseline.pkt；后续受限版中 .101 的 ping 失败是政策预期。', command: 'show vlan brief\nshow interfaces trunk'}
+      {title: '完整配置 CORE-SW', detail: 'Fa0/1 到 R1，G0/1 与 G0/2 到学生和教师交换机，Fa0/5 到访客交换机；Fa0/2、Fa0/3、Fa0/6 接三个服务器，Fa0/4 接 AUTH。管理 SVI 是 .115。以下从用户模式开始。', command: `enable
+configure terminal
+hostname CORE-SW
+vlan 10
+ name STUDENTS
+vlan 20
+ name TEACHERS
+vlan 30
+ name SERVERS
+vlan 40
+ name GUESTS
+vlan 99
+ name MANAGEMENT
+exit
+interface fa0/1
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,30,40,99
+exit
+interface range g0/1 - 2
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,30,40,99
+exit
+interface fa0/5
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,30,40,99
+exit
+interface range fa0/2 - 3
+ switchport mode access
+ switchport access vlan 30
+exit
+interface fa0/6
+ switchport mode access
+ switchport access vlan 30
+exit
+interface fa0/4
+ switchport mode access
+ switchport access vlan 99
+exit
+interface vlan 99
+ ip address 192.168.10.115 255.255.255.240
+ no shutdown
+exit
+ip default-gateway 192.168.10.113
+end
+copy running-config startup-config`},
+      {title: '完整配置 STU-SW', detail: 'Fa0/1、Fa0/2 接学生 PC；G0/1 上联 CORE。管理 SVI 是 .116。', command: `enable
+configure terminal
+hostname STU-SW
+vlan 10
+ name STUDENTS
+vlan 20
+ name TEACHERS
+vlan 30
+ name SERVERS
+vlan 40
+ name GUESTS
+vlan 99
+ name MANAGEMENT
+exit
+interface range fa0/1 - 2
+ switchport mode access
+ switchport access vlan 10
+exit
+interface g0/1
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,30,40,99
+exit
+interface vlan 99
+ ip address 192.168.10.116 255.255.255.240
+ no shutdown
+exit
+ip default-gateway 192.168.10.113
+end
+copy running-config startup-config`},
+      {title: '完整配置 TCH-SW', detail: 'Fa0/1、Fa0/2 接教师 PC；G0/1 上联 CORE。管理 SVI 是 .117。', command: `enable
+configure terminal
+hostname TCH-SW
+vlan 10
+ name STUDENTS
+vlan 20
+ name TEACHERS
+vlan 30
+ name SERVERS
+vlan 40
+ name GUESTS
+vlan 99
+ name MANAGEMENT
+exit
+interface range fa0/1 - 2
+ switchport mode access
+ switchport access vlan 20
+exit
+interface g0/1
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,30,40,99
+exit
+interface vlan 99
+ ip address 192.168.10.117 255.255.255.240
+ no shutdown
+exit
+ip default-gateway 192.168.10.113
+end
+copy running-config startup-config`},
+      {title: '完整配置 GUEST-SW', detail: 'Fa0/1 接 Guest-1；G0/1 上联 CORE-SW Fa0/5。管理 SVI 是 .118。', command: `enable
+configure terminal
+hostname GUEST-SW
+vlan 10
+ name STUDENTS
+vlan 20
+ name TEACHERS
+vlan 30
+ name SERVERS
+vlan 40
+ name GUESTS
+vlan 99
+ name MANAGEMENT
+exit
+interface fa0/1
+ switchport mode access
+ switchport access vlan 40
+exit
+interface g0/1
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,30,40,99
+exit
+interface vlan 99
+ ip address 192.168.10.118 255.255.255.240
+ no shutdown
+exit
+ip default-gateway 192.168.10.113
+end
+copy running-config startup-config`},
+      {title: '完整配置 R1 五个网关', detail: '2911 使用 G0/0；物理接口必须 no shutdown。子接口的 dot1Q VLAN 与交换机的标签对应。五个网段直接连接，不输入静态路由。', command: `enable
+configure terminal
+hostname R1
+interface g0/0
+ no ip address
+ no shutdown
+exit
+interface g0/0.10
+ encapsulation dot1Q 10
+ ip address 192.168.10.1 255.255.255.192
+exit
+interface g0/0.20
+ encapsulation dot1Q 20
+ ip address 192.168.10.65 255.255.255.224
+exit
+interface g0/0.30
+ encapsulation dot1Q 30
+ ip address 192.168.10.97 255.255.255.240
+exit
+interface g0/0.40
+ encapsulation dot1Q 40
+ ip address 192.168.10.129 255.255.255.224
+exit
+interface g0/0.99
+ encapsulation dot1Q 99
+ ip address 192.168.10.113 255.255.255.240
+end
+show ip interface brief
+show ip route
+copy running-config startup-config`},
+      {title: '验证无 ACL 的基线并保存', detail: '各 PC 先 ping 本网关；SA、TA、G1 再 ping .100 / .101 / .102。此阶段还没有入口 ACL，基础路径应可达。四台交换机分别执行 show vlan brief 与 show interfaces trunk；失败先修 IP、access VLAN、trunk 和接口状态。保存 00_baseline.pkt。后续 HTTP 许可不会自动开放服务器 ping。', command: `show vlan brief
+show interfaces trunk`}
     ],
     questions: [
-      {question: 'CORE-SW 到 R1 的一根线需要传四个 VLAN，应使用？', options: ['只属于 VLAN 10 的 access', '允许所需 VLAN 的 802.1Q trunk', '给每台学生 PC 增加静态路由'], correctIndex: 1, explanation: 'trunk 把多 VLAN 流量带给 R1；R1 按标签交给对应子接口。'},
-      {question: 'Student-A 与 Student-B 同在 VLAN 10，它们的本地通信会经过学生子接口 ACL 吗？', options: ['通常不会，交换机可以直接转发', '每一个帧都必须进入 R1', '只有获授权后才能本地通信'], correctIndex: 0, explanation: '同 VLAN 内通信通常不经过路由器。路由接口 ACL 不能被当成同 VLAN 内所有流量的保护。'}
+      {question: 'CORE 到 GUEST-SW 的骨干应该怎样配置？', options: ['只属于 VLAN 40 的 access', '允许 10,20,30,40,99 的 trunk', '只允许 VLAN 10 的 trunk'], correctIndex: 1, explanation: '设计中四条骨干都传五个 VLAN，其中 VLAN 40 承载访客，VLAN 99 承载管理 SVI。'},
+      {question: '五个 R1 子接口正常后，还必须给这五个本地子网添加静态路由吗？', options: ['不需要，它们是直连网络', '需要为每台 PC 添加一条', '只需要给访客网添加'], correctIndex: 0, explanation: '正确配置并正常工作的接口形成直连路由。此实验的五个本地网段无需静态路由。'}
     ],
-    takeaway: 'Access 定义终端所属区域，trunk 传递多个区域，R1 子接口连接这些区域。'
+    takeaway: '四台交换机配置五个 VLAN，四条骨干允许五个 VLAN，R1 五个子接口提供直连路由。'
   },
   {
-    id: 'acl', number: '04', title: '先限制，再精确开放', subtitle: '扩展 ACL 与网站服务',
-    lead: '基础通信正常后，给学生跨区请求加一份访问清单。我们只允许公共网站 HTTP 和到本网关的 ping，教师区、管理区及其余服务都拒绝。',
+    id: 'acl', number: '04', title: '公开可达，受限有界', subtitle: '三份入口 ACL 与三个 HTTP 网站',
+    lead: '默认只向学生和访客开放 PUB；教师可以使用 PUB、COURSE、LAB。三个入口各绑定自己的 ACL，网站许可仅开放 TCP 80，各区域到本网关的 ping 单独许可，其余跨区流量拒绝。',
     concepts: [
-      {title: '规则要同时看来源、目的与服务', body: '扩展 ACL 可以按源 IP、目的 IP、协议和端口筛选。TCP 80 是本实验的 HTTP 服务。host 表示只匹配一个地址；0.0.0.63 是学生 /26 子网的通配符掩码，不是接口掩码。', example: 'permit tcp 192.168.10.0 0.0.0.63 host 192.168.10.100 eq 80'},
-      {title: '从上往下，第一条匹配就决定结果', body: '清单先列公共许可和本网关 ICMP，再为授权留出序号 30，随后拒绝教师区、管理区及其他流量。许可如果排在覆盖它的拒绝之后，就没有机会命中。', example: '90 deny ip any any 会拒绝没有被前面规则许可的流量。'},
-      {title: '应用在学生入口的入方向', body: '只创建 ACL 不会过滤流量。把 STUDENT_POLICY 绑定到 G0/0.10 的 in 方向，检查从学生 VLAN 进入 R1 的 IP 数据包。服务器回复从学生接口离开，不经过这份入方向 ACL。', example: 'ip access-group STUDENT_POLICY in'},
-      {title: 'HTTP 测试与 ping 测试不同', body: '允许网站 TCP 80 不会自动允许 ICMP。受限配置中学生 ping 公共服务器也会失败，但浏览公共网页应该成功。普通教师访问两个网站不受学生接口这份 ACL 的限制。', example: '打开 http://192.168.10.100 才是在测试公共网站许可。'}
+      {title: '来源、目的和服务一起匹配', body: '扩展 ACL 按源 IP、目的 IP、协议与端口筛选。host 只匹配一个 IP，eq 80 指 HTTP。学生 /26 的通配符是 0.0.0.63，教师与访客 /27 是 0.0.0.31，管理 /28 是 0.0.0.15；通配符不要当成接口掩码输入。', example: 'permit tcp 192.168.10.128 0.0.0.31 host 192.168.10.100 eq 80：只给访客子网开放 PUB 的 HTTP。'},
+      {title: '第一条匹配决定结果', body: 'ACL 从上往下检查，第一条匹配就结束。公共许可与本网关 ping 在前，单机授权预留在 30 / 31 / 40 / 41，再列跨区拒绝，最终 90 deny ip any any。把授权放在 90 之后没有作用。', example: 'SA 的 COURSE 授权放 STUDENT_POLICY 30；G1 的 COURSE 授权放 GUEST_POLICY 30，两者是不同清单。'},
+      {title: '三个子接口分别检查入方向', body: 'STUDENT_POLICY 绑定 G0/0.10 in；TEACHER_POLICY 绑定 G0/0.20 in；GUEST_POLICY 绑定 G0/0.40 in。只创建清单但不绑定，流量不会按该清单过滤。服务器回复从对应终端接口离开，不再匹配该接口的入方向清单。', example: '访客访问 COURSE 必须检查 G0/0.40 的 GUEST_POLICY，不是修改学生清单。'},
+      {title: '教师的全网站权限也很具体', body: '教师全网站权限是分别访问 .100 / .102 / .101 的 TCP 80。教师不能据此访问学生或访客电脑、管理区或任意 SSH 服务。学生和访客授权后的权限也只增加选定网站的 HTTP。', example: 'Teacher-A 打开三个网页成功，ping 学生 .11 或 SSH 到 R1 .113 仍应失败。'},
+      {title: 'HTTP 与 ping 需要不同证据', body: '浏览器使用 http://IP 测试 TCP 80；ping 使用 ICMP。入口清单只允许向本网关发送 ICMP echo，所以三个角色 ping 服务器失败可以与网页成功同时成立。', example: 'G1 可打开 http://192.168.10.100，却不能 ping .100；ping .129 应成功。'}
     ],
     teach: [
-      '把请求念成一句话：来自哪台电脑，要到哪台服务器，使用哪个服务。',
-      '带学生逐行读清单，找到第一条匹配，然后停止。不要继续往后找自己喜欢的许可。',
-      '让学生预测：公共网页能打开，为什么 ping 公共服务器仍可能失败？'
+      '逐行念出请求：哪台电脑，哪个网站，哪种协议，找到第一条匹配就停止。',
+      '先预测默认访问表，再分别从学生、教师、访客入口检查真实结果。',
+      '让同学解释“教师能访问所有教学网站”为何不能简写成 permit ip any any。',
+      '比较公共 HTTP 成功与服务器 ping 失败，强调测试协议必须对应许可。'
     ],
     lab: [
-      {title: '启动两个 HTTP 网站', detail: 'PUBLIC-SRV 和 LAB-SRV → Services → HTTP → On。公共首页写“公共课程资料”，实验首页写“受限实验资源”。在未应用 ACL 的基线中，从 Student-A 与 Teacher-A 用 Desktop → Web Browser 分别访问 http://192.168.10.100 和 http://192.168.10.101，确认两个服务都已运行。'},
-      {title: '创建未授权清单', detail: '以下方案使用命名 ACL 序号。当前 Packet Tracer 设备尚未完成预实验，应先确认可输入并插入这些序号；遇到 Invalid input 不要继续当成成功。第 05 课提供无序号的完整清单切换方法。序号 30 暂时空着。', command: 'enable\nconfigure terminal\nip access-list extended STUDENT_POLICY\n 10 permit tcp 192.168.10.0 0.0.0.63 host 192.168.10.100 eq 80\n 20 permit icmp 192.168.10.0 0.0.0.63 host 192.168.10.1 echo\n 70 deny ip any 192.168.10.64 0.0.0.31\n 80 deny ip any 192.168.10.112 0.0.0.15\n 90 deny ip any any\nexit\ninterface g0/0.10\n ip access-group STUDENT_POLICY in\nend\nshow access-lists\nshow ip interface g0/0.10\ncopy running-config startup-config'},
-      {title: '用对照组验证默认隔离', detail: 'A、B 打开公共网站应成功；打开实验网站应失败。学生 ping .1 应成功，ping 教师 .66 应失败。Teacher-A 打开两个网站应成功。不要为了让 ping .100 通过而加入 permit ip any any。'},
-      {title: '记录并保存受限版本', detail: '记录“发起电脑、目标、协议、预期、实际”。核对 G0/0.10 的入方向清单和规则顺序；Simulation 可以辅助观察丢弃位置。命中计数与事件显示以本机预实验为准。保存 01_restricted.pkt。', command: 'show access-lists\nshow ip interface g0/0.10'}
+      {title: '启动并区分三个 HTTP 网站', detail: 'PUB / COURSE / LAB → Services → HTTP → On。首页分别写“公开资料”“受限课程资源”“受限实验资源”。在无 ACL 基线中，从 SA、TA、G1 分别访问 http://192.168.10.100、http://192.168.10.102、http://192.168.10.101，先证明三个服务可用。'},
+      {title: '创建学生默认清单并绑定', detail: '下面没有单机 COURSE / LAB 授权。序号 30、31 留给 SA，40、41 留给 SB。命令尚未预实验，先确认所选 Packet Tracer 设备支持命名 ACL 序号；遇到 Invalid input 需查验，不能视为成功。第 05 课说明无序号备选。', command: `enable
+configure terminal
+ip access-list extended STUDENT_POLICY
+ 10 permit tcp 192.168.10.0 0.0.0.63 host 192.168.10.100 eq 80
+ 20 permit icmp 192.168.10.0 0.0.0.63 host 192.168.10.1 echo
+ 70 deny ip any 192.168.10.64 0.0.0.31
+ 75 deny ip any 192.168.10.128 0.0.0.31
+ 80 deny ip any 192.168.10.112 0.0.0.15
+ 90 deny ip any any
+exit
+interface g0/0.10
+ ip access-group STUDENT_POLICY in
+end
+show access-lists
+show ip interface g0/0.10`},
+      {title: '创建访客默认清单并绑定', detail: '访客默认只开放 PUB 与本网关 .129 的 ping。序号 30、31 分别留给 G1 的 COURSE、LAB；拒绝教师、学生、管理区域及其他流量。', command: `configure terminal
+ip access-list extended GUEST_POLICY
+ 10 permit tcp 192.168.10.128 0.0.0.31 host 192.168.10.100 eq 80
+ 20 permit icmp 192.168.10.128 0.0.0.31 host 192.168.10.129 echo
+ 70 deny ip any 192.168.10.64 0.0.0.31
+ 75 deny ip any 192.168.10.0 0.0.0.63
+ 80 deny ip any 192.168.10.112 0.0.0.15
+ 90 deny ip any any
+exit
+interface g0/0.40
+ ip access-group GUEST_POLICY in
+end
+show access-lists
+show ip interface g0/0.40`},
+      {title: '创建教师默认清单并绑定', detail: '教师子网分别许可 PUB、COURSE、LAB 的 TCP 80；仅额外许可本网关 .65 的 ping。它不赋予访问学生、访客、管理网或其他服务的能力。', command: `configure terminal
+ip access-list extended TEACHER_POLICY
+ 10 permit tcp 192.168.10.64 0.0.0.31 host 192.168.10.100 eq 80
+ 11 permit tcp 192.168.10.64 0.0.0.31 host 192.168.10.102 eq 80
+ 12 permit tcp 192.168.10.64 0.0.0.31 host 192.168.10.101 eq 80
+ 20 permit icmp 192.168.10.64 0.0.0.31 host 192.168.10.65 echo
+ 70 deny ip any 192.168.10.0 0.0.0.63
+ 75 deny ip any 192.168.10.128 0.0.0.31
+ 80 deny ip any 192.168.10.112 0.0.0.15
+ 90 deny ip any any
+exit
+interface g0/0.20
+ ip access-group TEACHER_POLICY in
+end
+show access-lists
+show ip interface g0/0.20
+copy running-config startup-config`},
+      {title: '验证完整默认访问表', detail: 'SA、SB、G1：PUB 成功，COURSE / LAB 失败；TA、TB：三个网站全部成功。学生、教师、访客 PC ping 各自网关成功，ping 三服务器失败符合各自入口清单。AUTH 管理终端测试单列，不套用普通访问者策略：VLAN 99 未绑定这些入口 ACL，AUTH ping 服务器可以成功。学生不能跨区到教师、访客、管理；访客不能到教师、学生、管理；教师不能到学生、访客、管理。记录发起电脑、目标、协议、预期和实际，保存 01_restricted.pkt。Simulation 和命中计数可辅助定位，显示能力需本机验证。'}
     ],
     questions: [
-      {question: 'A 可以打开公共网页，但 ping .100 失败，最合理的解释是？', options: ['HTTP 许可只开放 TCP 80，没有开放该目标的 ICMP', '浏览器一定使用了另一台服务器', '所有 ACL 都失效了'], correctIndex: 0, explanation: 'HTTP 和 ping 使用不同协议。当前政策只允许学生对本网关发 ICMP echo。'},
-      {question: '创建了 STUDENT_POLICY，但学生仍能访问所有区域。首先检查什么？', options: ['学生电脑是否用了好看的图标', '是否绑定到正确子接口的入方向', '把最后的拒绝删掉'], correctIndex: 1, explanation: 'ACL 必须被应用到流量经过的位置才生效。本方案应在 R1 G0/0.10 绑定 in。'}
+      {question: 'Guest-1 可以打开 PUB，却 ping 不通 PUB，最合理的解释是？', options: ['HTTP 许可仅开放 TCP 80，服务器 ICMP 没有放行', 'GUEST_POLICY 一定未绑定', '应立即加入 permit ip any any'], correctIndex: 0, explanation: 'HTTP 与 ICMP 是不同协议。访客只允许 ping 自己的 .129 网关，不能用服务器 ping 代替网站测试。'},
+      {question: '学生清单正确，但 G1 仍能访问所有网站，先检查什么？', options: ['STU-SW 的名称', 'G0/0.40 是否入方向绑定 GUEST_POLICY', '删除教师清单'], correctIndex: 1, explanation: '访客流量进入 G0/0.40，必须由访客清单过滤。学生接口的 ACL 不会自动覆盖访客入口。'}
     ],
-    takeaway: '验证特定服务，按顺序匹配规则，并确认清单已经应用到正确入口。'
+    takeaway: '三个入口分别绑定三份清单；所有人的 PUB、教师的全网站、学生与访客的默认限制都要实测。'
   },
   {
-    id: 'grant', number: '05', title: '教师批准与撤销', subtitle: '只给 Student-A 打开实验网站',
-    lead: '专用 AUTH-PC 通过 SSH 管理 R1。教师先确认申请对象是 .11，再增加一条仅指向实验 HTTP 服务的许可。每次更改都用 A 和 B 对照测试。',
+    id: 'grant', number: '05', title: '按电脑、按网站授权', subtitle: '固定序号新增，独立撤销',
+    lead: '教师从 AUTH .114 通过 SSH 登录 R1 管理地址 .113。先核对申请电脑与网站，再增加对应序号的精确 HTTP 许可。SA、SB、G1 的 COURSE 和 LAB 各有独立规则，撤销其中一条不会撤掉另一条。',
     concepts: [
-      {title: '管理入口需要单独保护', body: '只拒绝学生进入管理 VLAN 不足以保护所有设备接口地址。VTY 是远程登录入口，应只接受 AUTH-PC .114，使用本地账号认证并仅允许 SSH。', example: 'access-class MGMT_ONLY in 限制谁可以发起远程登录。'},
-      {title: '授权是一条精确许可', body: '序号 30 只匹配源 .11、目的 .101、TCP 80。它不会开放 B、教师电脑、SSH 或服务器的所有服务。ACL 不记学生姓名，改用他人的授权 IP 可能冒用许可。', example: '30 permit tcp host 192.168.10.11 host 192.168.10.101 eq 80'},
-      {title: '撤销要用新的请求验证', body: '删除许可后，A 新发出的实验 HTTP 请求应被拒绝。已下载的文件和已经显示或缓存的网页内容不会被 ACL 自动收回。', example: '重新发起网页请求并观察 Simulation 中的新 TCP/HTTP 流量，不能只看旧页面仍在屏幕上。'},
-      {title: '同 VLAN 流量绕过路由入口', body: '受限服务器必须留在独立 VLAN 30。如果服务器和学生放在同一个 VLAN、同一个子网，流量可直接由交换机转发，学生入口 ACL 就看不到它。', example: '把 LAB-SRV 改放 VLAN 10 是改变安全边界，不能当作授权方法。'}
+      {title: '专用管理入口单独保护', body: '普通教师 PC 的网站权限不等于设备管理权限。R1 的 VTY 仅接受 AUTH .114 的来源，使用本地账号认证并只允许 SSH；课堂管理登录目标固定为 R1 .113。教师在本实验中使用管理员权限，实际职责与审批系统需另行设计。', example: 'AUTH 执行 ssh -l labteacher 192.168.10.113；Student-A、Guest-1、Teacher-A 均不能用该入口登录。'},
+      {title: '六种许可有固定位置', body: 'STUDENT_POLICY：30 = SA COURSE，31 = SA LAB，40 = SB COURSE，41 = SB LAB。GUEST_POLICY：30 = G1 COURSE，31 = G1 LAB。相同序号可以出现在不同清单，但操作前必须确认清单名称。', example: 'STUDENT_POLICY 的 no 30 撤销 SA 课程；GUEST_POLICY 的 no 30 撤销 G1 课程，两者不相互影响。'},
+      {title: '只新增申请的那条许可', body: '每条规则使用 host 来源、host 目的与 eq 80。给 SA 的 COURSE 许可不会开放 SA 的 LAB，不会开放 SB 或 G1，也不会开放 SSH 或服务器其他端口。给同一电脑两个网站权限需要两条许可。', example: '30 permit tcp host 192.168.10.11 host 192.168.10.102 eq 80：只授权 SA 的课程 HTTP。'},
+      {title: '撤销只删除指定序号', body: '删除被撤销的序号，保留该电脑的其他许可、其他电脑许可和完整拒绝项。用新的 HTTP 请求验证，旧网页、缓存和已经下载的内容不会自动收回。', example: 'SA 同时获 COURSE / LAB 后，在 STUDENT_POLICY 执行 no 30：新 COURSE 请求失败，新 LAB 请求仍成功。'},
+      {title: 'IP 许可有明确边界', body: '这里没有用户账号或网页审批；被授权 IP 被冒用时，ACL 不会辨认真实身份。受限服务器必须留在 VLAN 30，放进学生或访客同一 VLAN 会让本地交换绕过路由入口 ACL。', example: '修改浏览器姓名或页面按钮不会改变真实 R1 规则；移动 LAB 到 VLAN 10 也不是授权方法。'}
     ],
     teach: [
-      '请学生 A 提出“我需要打开实验网站”的申请，教师先核对目标电脑和服务。',
-      '把授权规则逐段翻译：只允许这台电脑，到这台服务器，使用这个端口。',
-      '授权后先测 A，再测 B，再测教师区隔离，三项都正确才算通过。',
-      '撤销时让学生重新请求资源，解释旧网页或已下载内容为何不会消失。'
+      '让申请者说清电脑与目标：SA、SB 或 G1；COURSE 或 LAB。教师逐段核对一条许可。',
+      '先只给 SA COURSE，测 SA LAB、SB COURSE、G1 COURSE 都仍失败，证明部分授权有效。',
+      '再给 G1 LAB，测 G1 COURSE 仍失败，同时 SA COURSE 保持成功。',
+      '给 SA 增加 LAB 后只撤销 COURSE，让学生观察两项权限可独立变动。',
+      '每次都检查 PUB 与普通教师三个网站仍可用，以及管理入口继续受保护。'
     ],
     lab: [
-      {title: '在 R1 配置 SSH 与管理来源限制', detail: '在本地 CLI 先做管理配置。把 <YOUR_LAB_PASSWORD> 替换为只用于本实验的口令，不要原样输入占位符。crypto key generate rsa 后出现位数提示时输入 1024；若设备要求另一种语法，以本机提示为准。以下覆盖 vty 0–4；若 show running-config 还列出 vty 5–15，也对它施加 login local、transport input ssh、access-class 三项。交换机若开启 SSH，同样应用来源限制，使用各自 .115/.116/.117 管理地址。', command: 'enable\nconfigure terminal\nip domain-name campus.lab\nusername labteacher privilege 15 secret <YOUR_LAB_PASSWORD>\ncrypto key generate rsa\n1024\nip ssh version 2\nip access-list standard MGMT_ONLY\n permit host 192.168.10.114\n deny any\nexit\nline vty 0 4\n login local\n transport input ssh\n access-class MGMT_ONLY in\nend\nshow ip ssh\nshow running-config\ncopy running-config startup-config'},
-      {title: '从授权终端登录并检查', detail: 'AUTH-PC → Desktop → Command Prompt 执行 SSH，输入刚设置的实验口令。普通教师电脑和学生电脑尝试 SSH 应失败；AUTH-PC 应能登录。教师在本实验中使用管理员权限，真实业务中应另行设计职责与审批权限。', command: 'ssh -l labteacher 192.168.10.113'},
-      {title: '批准 A，然后对照验证', detail: '确认第 04 课序号语法在所选设备可用后，从 R1 特权模式输入下面命令。查看 30 排在 70/80/90 前。A 新开实验网站应成功，B 仍失败；学生仍不能 ping 教师或 SSH 登录设备。保存 02_studentA_authorized.pkt。', command: 'configure terminal\nip access-list extended STUDENT_POLICY\n 30 permit tcp host 192.168.10.11 host 192.168.10.101 eq 80\nend\nshow access-lists\ncopy running-config startup-config'},
-      {title: '撤销 A 并复测', detail: '支持 ACL 序号时，只删除 30。保留公共网站、本网关检查及拒绝项。A 发起新的实验 HTTP 请求应失败，公共网站仍成功；B 始终失败。保存 03_revoked.pkt。', command: 'configure terminal\nip access-list extended STUDENT_POLICY\n no 30\nend\nshow access-lists\ncopy running-config startup-config'},
-      {title: '若设备不支持序号：切换完整清单', detail: '由教师在控制台操作。先建立下面两份独立完整清单，它们以输入顺序匹配；全部核对后才绑定 BASE。授权时把接口绑定改为 STUDENT_POLICY_A，撤销改回 STUDENT_POLICY_BASE。不删除正在使用的清单，也不把新许可追加到最终 deny 后。此备选方法同样需本机预实验。', command: 'enable\nconfigure terminal\nip access-list extended STUDENT_POLICY_BASE\n permit tcp 192.168.10.0 0.0.0.63 host 192.168.10.100 eq 80\n permit icmp 192.168.10.0 0.0.0.63 host 192.168.10.1 echo\n deny ip any 192.168.10.64 0.0.0.31\n deny ip any 192.168.10.112 0.0.0.15\n deny ip any any\nexit\nip access-list extended STUDENT_POLICY_A\n permit tcp 192.168.10.0 0.0.0.63 host 192.168.10.100 eq 80\n permit icmp 192.168.10.0 0.0.0.63 host 192.168.10.1 echo\n permit tcp host 192.168.10.11 host 192.168.10.101 eq 80\n deny ip any 192.168.10.64 0.0.0.31\n deny ip any 192.168.10.112 0.0.0.15\n deny ip any any\nexit\ninterface g0/0.10\n ip access-group STUDENT_POLICY_BASE in\nend\nshow access-lists'}
-      ,{title: '无序号备选：批准 A 的完整操作', detail: '只在上一项两份完整清单都已创建并核对后执行。此步骤替换接口当前绑定的清单，保留既有拒绝边界。不要把备用清单的命令与序号方案混在一起。', command: 'configure terminal\ninterface g0/0.10\n ip access-group STUDENT_POLICY_A in\nend\nshow access-lists\nshow ip interface g0/0.10\ncopy running-config startup-config'},
-      {title: '无序号备选：撤销 A 的完整操作', detail: '改回完整的基线清单。A 的新实验网页请求应失败，公共网页仍成功；B 仍应失败。', command: 'configure terminal\ninterface g0/0.10\n ip access-group STUDENT_POLICY_BASE in\nend\nshow access-lists\nshow ip interface g0/0.10\ncopy running-config startup-config'}
+      {title: '在 R1 配置 SSH 与 AUTH 来源限制', detail: '先在本地 CLI 操作。替换 <YOUR_LAB_PASSWORD> 为实验专用口令，不能原样输入。crypto key generate rsa 出现位数提示后输入 1024；若设备提示不同，以本机语法为准。以下保护 vty 0–4；若 show running-config 还有 vty 5–15，也施加 login local、transport input ssh、access-class 三项。此实验只配置 R1 SSH，不给普通教师电脑或其他设备扩展管理权限。', command: `enable
+configure terminal
+ip domain-name campus.lab
+username labteacher privilege 15 secret <YOUR_LAB_PASSWORD>
+crypto key generate rsa
+1024
+ip ssh version 2
+ip access-list standard MGMT_ONLY
+ permit host 192.168.10.114
+ deny any
+exit
+line vty 0 4
+ login local
+ transport input ssh
+ access-class MGMT_ONLY in
+end
+show ip ssh
+show running-config
+copy running-config startup-config`},
+      {title: '从 AUTH 登录 R1', detail: 'AUTH → Desktop → Command Prompt 输入下面命令，再输入实验口令。AUTH 应成功；SA、SB、G1、TA、TB 尝试同一目标应失败。后续授权命令在 R1 特权模式执行。SSH 和 ACL 序号均未完成预实验，必须先核实支持情况。', command: `ssh -l labteacher 192.168.10.113`},
+      {title: '只批准 SA 的 COURSE', detail: '这是“只开课程”的完整新增操作。SA 新请求 COURSE 应成功，SA LAB 仍失败，SB / G1 的两个受限网站仍失败。检查 30 位于最终拒绝之前。', command: `configure terminal
+ip access-list extended STUDENT_POLICY
+ 30 permit tcp host 192.168.10.11 host 192.168.10.102 eq 80
+end
+show access-lists
+copy running-config startup-config`},
+      {title: '独立批准 SA 的 LAB', detail: '仅在申请 SA 实验权限时新增 31；它不代替或修改 30。若上一项课程许可仍存在，SA 两个受限网站都成功；否则只 LAB 成功。', command: `configure terminal
+ip access-list extended STUDENT_POLICY
+ 31 permit tcp host 192.168.10.11 host 192.168.10.101 eq 80
+end
+show access-lists
+copy running-config startup-config`},
+      {title: '只批准 SB 的 COURSE', detail: '仅在申请 SB 课程权限时新增 40。它不会开放 SB LAB，也不改变 SA 与 G1 的许可。若需要实验权限，另执行下一项。', command: `configure terminal
+ip access-list extended STUDENT_POLICY
+ 40 permit tcp host 192.168.10.12 host 192.168.10.102 eq 80
+end
+show access-lists
+copy running-config startup-config`},
+      {title: '独立批准 SB 的 LAB', detail: '仅在申请 SB 实验权限时新增 41。它不会新增 SB COURSE；已有课程许可则保持不变。', command: `configure terminal
+ip access-list extended STUDENT_POLICY
+ 41 permit tcp host 192.168.10.12 host 192.168.10.101 eq 80
+end
+show access-lists
+copy running-config startup-config`},
+      {title: '只批准 G1 的 COURSE', detail: '仅在申请 G1 课程权限时新增 GUEST_POLICY 30，来源固定 .130。G1 LAB 仍按原状态；学生许可不变。', command: `configure terminal
+ip access-list extended GUEST_POLICY
+ 30 permit tcp host 192.168.10.130 host 192.168.10.102 eq 80
+end
+show access-lists
+copy running-config startup-config`},
+      {title: '独立批准 G1 的 LAB', detail: '仅在申请 G1 实验权限时新增 GUEST_POLICY 31。若 G1 没有课程许可，授权后仍只能打开 PUB 与 LAB，COURSE 仍失败；SA / SB 的许可不变。', command: `configure terminal
+ip access-list extended GUEST_POLICY
+ 31 permit tcp host 192.168.10.130 host 192.168.10.101 eq 80
+end
+show access-lists
+copy running-config startup-config`},
+      {title: '只撤销选定电脑的选定网站', detail: '下面示例仅撤销 SA COURSE，保留 SA LAB。其他撤销在正确清单中只执行一个指定删除：STUDENT_POLICY 的 no 31 / no 40 / no 41 分别撤 SA LAB / SB COURSE / SB LAB；GUEST_POLICY 的 no 30 / no 31 分别撤 G1 COURSE / G1 LAB。不要删除整份 ACL。复测新的请求，保存 02_partial_authorized.pkt 与 03_partial_revoked.pkt。', command: `configure terminal
+ip access-list extended STUDENT_POLICY
+ no 30
+end
+show access-lists
+show ip interface g0/0.10
+copy running-config startup-config`},
+      {title: '无序号备选：先创建两份完整访客清单', detail: '只在设备无法使用命名 ACL 序号时采用此备选，由教师在控制台操作。示例仅提供 G1 基线与“只开 COURSE”两份完整清单，均先创建并核对，下一项才切换绑定。它们按输入顺序匹配，不把新许可追加在 deny any any 后，不删除正在绑定的清单。其他电脑或权限组合必须先按当前完整授权状态生成完整清单、核对全部许可和拒绝项，再绑定；不要直接照搬此示例。', command: `enable
+configure terminal
+ip access-list extended GUEST_POLICY_BASE
+ permit tcp 192.168.10.128 0.0.0.31 host 192.168.10.100 eq 80
+ permit icmp 192.168.10.128 0.0.0.31 host 192.168.10.129 echo
+ deny ip any 192.168.10.64 0.0.0.31
+ deny ip any 192.168.10.0 0.0.0.63
+ deny ip any 192.168.10.112 0.0.0.15
+ deny ip any any
+exit
+ip access-list extended GUEST_POLICY_G1_COURSE
+ permit tcp 192.168.10.128 0.0.0.31 host 192.168.10.100 eq 80
+ permit icmp 192.168.10.128 0.0.0.31 host 192.168.10.129 echo
+ permit tcp host 192.168.10.130 host 192.168.10.102 eq 80
+ deny ip any 192.168.10.64 0.0.0.31
+ deny ip any 192.168.10.0 0.0.0.63
+ deny ip any 192.168.10.112 0.0.0.15
+ deny ip any any
+end
+show access-lists`},
+      {title: '无序号备选：先绑定基线', detail: '仅在上一项两份完整清单已创建并核对后，将 G0/0.40 绑定 BASE。验证 G1 只有 PUB。两份示例均不包含 G1 LAB：若当前有需要保留的 LAB 许可，先生成包含 LAB 的完整清单，不能直接切 BASE 导致额外撤销。学生与教师清单若也不支持序号，同样先建立完整默认清单后绑定对应入口。', command: `configure terminal
+interface g0/0.40
+ ip access-group GUEST_POLICY_BASE in
+end
+show ip interface g0/0.40
+copy running-config startup-config`},
+      {title: '无序号备选：只批准 G1 COURSE', detail: '切换到已创建并核对的完整 G1_COURSE 清单。G1 COURSE 成功，LAB 仍失败，PUB 保持成功。此示例只适用于没有需要保留的 G1 LAB 许可的状态；其他组合先生成完整清单再绑定。', command: `configure terminal
+interface g0/0.40
+ ip access-group GUEST_POLICY_G1_COURSE in
+end
+show ip interface g0/0.40
+copy running-config startup-config`},
+      {title: '无序号备选：撤销示例中的 G1 COURSE', detail: '此示例原来只有 G1 COURSE，因此改回完整 BASE 就只撤销该项课程许可。发起新请求，COURSE 失败、PUB 成功。若另有 LAB 权限要保留，则不能直接切 BASE，必须先生成保留 LAB 的完整清单再绑定。', command: `configure terminal
+interface g0/0.40
+ ip access-group GUEST_POLICY_BASE in
+end
+show ip interface g0/0.40
+copy running-config startup-config`}
     ],
     questions: [
-      {question: 'A 获授权，B 也能打开实验网站，应优先检查？', options: ['是否误把来源写成整个学生子网或 any', 'A 的桌面颜色', '把教师网关换成 .1'], correctIndex: 0, explanation: '正确许可应是 host 192.168.10.11。来源过宽可能把其他学生一起开放。'},
-      {question: '撤销许可后，A 屏幕上仍显示刚打开的实验网页，这能证明撤销失败吗？', options: ['能，旧内容必须立即消失', '不能，应发起新请求并观察结果', '能，ACL 能删除已经下载的文件'], correctIndex: 1, explanation: 'ACL 过滤新的经过路由器的数据包，不会收回已送达的内容。新请求失败才是撤销验证的核心。'}
+      {question: 'SA 同时拥有 COURSE 和 LAB，现在只撤销 COURSE，应怎样操作？', options: ['删除整个 STUDENT_POLICY', '在 STUDENT_POLICY 只删除序号 30', '删除 GUEST_POLICY 的序号 30 与 31'], correctIndex: 1, explanation: 'STUDENT_POLICY 30 是 SA COURSE，31 是 SA LAB。只删 30 才能独立撤销课程，同时保留实验和其他电脑许可。'},
+      {question: '只批准 G1 的 LAB 后，哪组结果正确？', options: ['G1 COURSE 也成功，SB LAB 也成功', 'G1 可以 SSH 管理 R1', 'G1 PUB 和 LAB 成功，COURSE 仍失败；学生许可不变'], correctIndex: 2, explanation: 'GUEST_POLICY 31 只匹配源 .130、目的 .101、TCP 80。它不开放课程、其他电脑或设备管理。'}
     ],
-    takeaway: '授权要精确，撤销要复测；IP 许可与真实用户身份、网页内容权限是不同层面的设计。'
+    takeaway: '六项许可分别新增、分别撤销；固定 IP 授权只作用于选定电脑的选定 HTTP 网站。'
   },
   {
-    id: 'trouble', number: '06', title: '用证据定位故障', subtitle: '从现象到原因，再恢复完整政策',
-    lead: '“打不开”只是现象。它可能来自地址、VLAN、trunk、路由、ACL 或 HTTP 服务。每次只加入一个错误，先预测，再收集证据，最后修复并复测整张访问表。',
+    id: 'trouble', number: '06', title: '用证据恢复正确访问', subtitle: '规则顺序、HTTP 服务与服务器 trunk',
+    lead: '打不开可能是正确拒绝，也可能是故障。先说出当前授权状态下的预期，再按“现象 → 证据 → 原因 → 修复 → 复测”定位。每次只引入一个错误，最后检查所有角色和三个网站。',
     concepts: [
-      {title: '先分清故障发生在哪一层', body: '本网关不通先查 IP、掩码、接入 VLAN 和链路；公共网页也不通再查服务器区 trunk、网关和 HTTP 服务；只有 A 的实验网站不通时再查授权规则与顺序。', example: 'A 连 .1 都 ping 不通，先查 Fa0/1 是否仍属于 VLAN 10。'},
-      {title: '拒绝可能是正确结果', body: '未授权学生访问实验网站失败、学生 ping 教师失败，都符合政策。把每个失败都修成成功，会破坏隔离。判断依据应是预期矩阵。', example: 'B 在 A 获授权后仍打不开实验网站，是对照测试通过。'},
-      {title: '网络许可不保证服务运行', body: '路由和 ACL 可以允许请求，但 HTTP 服务关闭时仍无法浏览。教师能否打开网站是一个对照，Server 的 Services → HTTP 是直接证据。', example: 'A 已授权且教师也打不开 .101：检查 LAB-SRV 的 HTTP 状态。'},
-      {title: '修复后检查没有多开放', body: '每次修改后测试公共服务、A 授权状态、B 拒绝、教师隔离和管理入口。保存原因和证据，而不只保存“现在成功了”的截图。', example: '加 permit ip any any 让网页成功，却同时开放教师与管理区，不算正确修复。'}
+      {title: '失败先对照当前政策', body: '默认 SA / SB / G1 不能打开 COURSE 或 LAB；只授权 SA COURSE 后，SA LAB、SB COURSE、G1 COURSE 仍失败。这些都是正确结果，不应通过放开所有流量来消除。', example: 'G1 只获 LAB 许可：COURSE 失败是通过对照测试，不是需要修复的错误。'},
+      {title: '先检查基础路径再检查许可', body: '本网关不通，先看 IP、掩码、网关、access VLAN 与链路；三个网站都失败，检查服务器 VLAN 30 路径与服务；只有已授权的选定网站失败，检查对应入口 ACL 的来源、目的、端口与顺序。', example: 'SA 已获 COURSE 而 TA 的 COURSE 正常：优先核对 STUDENT_POLICY 30 是否排在 90 之前。'},
+      {title: '网络放行不代表应用已运行', body: 'HTTP 关闭会让已授权访问者与教师都无法打开该网站，即使 VLAN、路由、ACL 完全正确。选定服务器的 Services → HTTP 是直接证据；服务器 ping 在本实验入口清单下不是网站检查。', example: '只关闭 COURSE HTTP：TA 和已授权 SA 的 COURSE 失败，PUB 与 LAB 仍按原政策工作。'},
+      {title: '共同路径故障会影响多个网站', body: 'CORE 到 R1 的 trunk 若遗漏 VLAN 30，三个网站的跨 VLAN 通信都受影响。各 PC 仍可能 ping 通自己的网关，因为它们所属 VLAN 还被允许通过；不要因此断定服务器路径正常。', example: 'TA 三个网站全失败、SA 和 G1 的 PUB 也失败：核对 CORE Fa0/1 是否允许 VLAN 30。'},
+      {title: '修复后也要证明没有多开放', body: '恢复成功的同时保留应拒绝的请求。检查三个网站、SA / SB / G1 的独立授权、教师全网站、各本网关、跨区限制与 AUTH SSH。旧网页显示和已下载文件不能证明撤销失败。', example: '加入 permit ip any any 让网页成功，却开放教师、学生、访客或管理区域，不能算正确修复。'}
     ],
     teach: [
-      '先让学生说出预期：这个请求本来应该成功还是失败？',
-      '每次只引入一个故障，避免同时修改三个地方后猜测原因。',
-      '要求“现象 → 证据 → 定位 → 修改 → 复测”五步说明。',
-      '最后请学生解释 IP 授权的边界：冒用地址、同 VLAN 绕过、已下载内容都不由本方案解决。'
+      '每次先明确当前申请记录，再让同学预测哪些请求成功、哪些失败。',
+      '一次只注入一种故障，使用未授权电脑和普通教师作为对照。',
+      '要求定位证据：清单顺序、HTTP 开关或 trunk 允许列表，而不是只说“现在好了”。',
+      '修复后重测整个访问表，包括只有一个受限网站开放的情况。',
+      '让同学说明固定 IP 许可、同 VLAN 绕过与已下载内容这些实验边界。'
     ],
     lab: [
-      {title: '故障 1：许可放在拒绝之后', detail: '在备份副本中构造错误：把 A 的许可放到 deny ip any any 后面。预测 A 仍失败，检查 show access-lists 找到第一条匹配。恢复到前置序号 30，或切回核对过的完整授权清单。不要在正式正确文件上丢失原配置。', command: 'show access-lists\nshow ip interface g0/0.10'},
-      {title: '故障 2：B 接错 VLAN', detail: '在 STU-SW 把 Fa0/2 改为 access vlan 20，但 B 保留 .12/26 与网关 .1。观察 B 到 .1 失败。检查端口归属后把它改回 VLAN 10；不要靠把 B 改成教师 IP 来绕过学生政策。', command: 'show vlan brief\n! 修复，在 STU-SW 执行：\nconfigure terminal\ninterface fa0/2\n switchport access vlan 10\nend'},
-      {title: '故障 3：R1 链路遗漏服务器 VLAN', detail: '在 CORE-SW Fa0/1 的 trunk 允许列表里暂时去掉 VLAN 30。教师与已授权 A 都可能无法访问网站，说明不是单学生许可问题。核对链路的允许项，再恢复四个 VLAN。', command: 'show interfaces trunk\n! 修复，在 CORE-SW 执行：\nconfigure terminal\ninterface fa0/1\n switchport trunk allowed vlan 10,20,30,99\nend'},
-      {title: '故障 4：实验网站服务关闭', detail: 'LAB-SRV → Services → HTTP → Off。保持 A 授权和正确网络配置，比较 A 与 Teacher-A 的新 HTTP 请求。再打开 HTTP，重新访问。ping 在受限学生政策下不是网站服务检查。'},
-      {title: '提交验证记录', detail: '每个故障写一行：预期、现象、检查证据、原因、修复与复测。保存正确的未授权、A 授权、撤销三份 .pkt；附 HTTP 结果、ACL 顺序与拓扑截图。网站动画是学习辅助，真实 Packet Tracer 文件与测试证据仍需自己完成。', command: 'show ip interface brief\nshow ip route\nshow access-lists\n! 在交换机执行：\nshow vlan brief\nshow interfaces trunk'}
+      {title: '故障 1：把许可放到最终拒绝之后', detail: '仅在正确文件的备份副本中、已确认序号语法可用后操作。先删除有效的 SA COURSE 序号 30，再把同一许可故意放到 95，位于 90 deny ip any any 之后。预测 SA COURSE 失败、TA COURSE 正常；PUB 与其他许可仍按原政策。检查第一条匹配并记录证据，完成观察后才执行下一项修复。', command: `configure terminal
+ip access-list extended STUDENT_POLICY
+ no 30
+ 95 permit tcp host 192.168.10.11 host 192.168.10.102 eq 80
+end
+show access-lists
+show ip interface g0/0.10`},
+      {title: '恢复故障 1：删除错误规则并前置许可', detail: '只删本次注入的错误序号 95，将 SA COURSE 恢复为固定序号 30。新的课程请求应成功，SA LAB 仍按已有独立许可，SB 与 G1 状态不变。无序号方案在备份中构造相同顺序错误后，切回核对过的完整课程清单。', command: `configure terminal
+ip access-list extended STUDENT_POLICY
+ no 95
+ 30 permit tcp host 192.168.10.11 host 192.168.10.102 eq 80
+end
+show access-lists`},
+      {title: '故障 2：只关闭选定网站 HTTP', detail: '选 COURSE .102 做本次故障：确保 SA 已获 COURSE 许可，再把 COURSE → Services → HTTP 改为 Off。SA 和 TA 的新 COURSE 请求均失败；PUB 与 LAB 应继续遵守原许可。直接检查 COURSE HTTP 状态后改回 On，发起新请求复测。若改选 LAB，只改 LAB 并用已获 LAB 许可的电脑对照；不要同时关闭三个服务。'},
+      {title: '故障 3：R1 trunk 遗漏 VLAN 30', detail: '备份正确文件，在 CORE-SW Fa0/1 将 allowed 列表暂改成 10,20,40,99。TA 的三个网站，以及 SA / SB / G1 的 PUB 都应失败；本网关仍可能可达。检查 trunk 允许项，恢复 10,20,30,40,99。不要移动服务器到学生或访客 VLAN 来绕开故障。', command: `show interfaces trunk
+! 修复，在 CORE-SW 执行：
+configure terminal
+interface fa0/1
+ switchport trunk allowed vlan 10,20,30,40,99
+end
+show interfaces trunk
+copy running-config startup-config`},
+      {title: '恢复并验证默认与部分授权', detail: '至少保存三种正确状态：默认 SA / SB / G1 只有 PUB；部分授权示例 SA 只有 COURSE、G1 只有 LAB、SB 只有 PUB；再撤销 SA COURSE 时，G1 LAB 保持成功。每种状态都验证 TA / TB 三个网站与 PUB 的普遍可达。SSH 只从 AUTH 发起到 R1 .113；其他终端尝试该入口应失败。'},
+      {title: '提交故障与测试记录', detail: '每个故障记录预期、现象、证据、原因、修复与复测。附 14 设备拓扑、五个子网表、四台交换机 VLAN / trunk 输出、R1 三份入口 ACL 与部分授权 HTTP 结果。命令和 .pkt 尚未完成预实验；网站动画用于教学，真正的 Packet Tracer 文件和测试证据要在本机完成。', command: `show ip interface brief
+show ip route
+show access-lists
+show ip interface g0/0.10
+show ip interface g0/0.20
+show ip interface g0/0.40
+! 以下在四台交换机分别执行：
+show vlan brief
+show interfaces trunk`}
     ],
     questions: [
-      {question: 'B 未授权，实验网页失败，但公共网页成功。应如何处理？', options: ['加入 permit ip any any', '删除学生 ACL', '这是政策预期，继续按矩阵验证其他项目'], correctIndex: 2, explanation: '未授权学生只能使用公共网站。正确的拒绝不是需要修复的故障。'},
-      {question: 'A 已授权，教师也打不开实验网站。下一步更有帮助的是？', options: ['先给全部学生授权', '检查服务器 HTTP、IP、网关与 VLAN 30 路径', '把服务器移入学生 VLAN'], correctIndex: 1, explanation: '教师没有经过学生入方向 ACL 的限制。两者同样失败提示公共路径或应用服务问题，应收集证据再修改。'}
+      {question: 'G1 只获 LAB 许可，PUB 与 LAB 成功、COURSE 失败，应如何处理？', options: ['加入 permit ip any any', '删除访客 ACL', '结果符合部分授权，继续复测其他限制'], correctIndex: 2, explanation: '实验和课程许可独立。没有课程许可时 COURSE 应失败，不能把正确拒绝改成全开放。'},
+      {question: 'TA 的三个网站全失败，G1 的 PUB 也失败，但各自网关 ping 成功，优先检查哪项？', options: ['先给 G1 两个受限网站授权', 'CORE 到 R1 的 trunk 是否遗漏 VLAN 30', '把所有服务器搬到 VLAN 40'], correctIndex: 1, explanation: '不同入口的网站请求共同经过服务器 VLAN 30。本网关可达只证明各自 VLAN 路径部分正常，不能证明服务器 VLAN 能通过 trunk。'}
     ],
-    takeaway: '正确排错既要恢复该成功的访问，也要保留该拒绝的访问。'
+    takeaway: '排错要恢复应成功的访问，并保留应拒绝的访问；每个判断都对应当前授权状态与可检查的证据。'
   }
 ];
 
 
 /**
- * Bounded classroom model for the campus access-control lesson.
- * It does not configure a device or implement a real network stack.
- * Student identity here is a fixed source IP, not an authenticated person.
+ * Bounded classroom model of source-VLAN inbound ACLs and HTTP website access.
+ * An actor denotes a fixed source IP, not an authenticated person. This module
+ * does not configure devices or simulate a complete ARP/TCP/IP stack.
  *
- * `networkAllowed` means the first matching inbound ACL rule permits a packet.
- * A permitted packet can still fail because a trunk or HTTP service is broken.
- * Paths intentionally show CORE twice for router-on-a-stick inter-VLAN traffic.
+ * `networkAllowed` is only the first matching ACL decision. Link and service
+ * availability are separate facts; an ACL denial always stops the journey at R1.
+ * ARP caches are assumed ready, and one HTTP request/reply represents a whole
+ * website visit. CORE appears twice because this is router-on-a-stick routing.
  */
 
 const BASE = '192.168.10.';
-const SOURCES = Object.freeze({ A: 'SA', B: 'SB' });
-const TARGETS = Object.freeze({ public: 'PUB', lab: 'LAB', teacher: 'TA', management: 'AUTH' });
-const IPS = Object.freeze({ SA: `${BASE}11`, SB: `${BASE}12`, PUB: `${BASE}100`, LAB: `${BASE}101`, TA: `${BASE}66`, AUTH: `${BASE}114` });
-const VLAN = Object.freeze({ public: 30, lab: 30, teacher: 20, management: 99 });
-const NAMES = Object.freeze({ public: '公共教学网站', lab: '受限实验网站', teacher: '教师电脑', management: '管理区 AUTH-PC' });
+const ACTORS = Object.freeze({
+  SA: Object.freeze({ name: 'Student-A', ip: `${BASE}11`, vlan: 10, prefix: 26, gateway: `${BASE}1`, subnet: `${BASE}0`, wildcard: '0.0.0.63', accessSwitch: 'SS', policyName: 'STUDENT_POLICY' }),
+  SB: Object.freeze({ name: 'Student-B', ip: `${BASE}12`, vlan: 10, prefix: 26, gateway: `${BASE}1`, subnet: `${BASE}0`, wildcard: '0.0.0.63', accessSwitch: 'SS', policyName: 'STUDENT_POLICY' }),
+  TA: Object.freeze({ name: '教师 TA', ip: `${BASE}66`, vlan: 20, prefix: 27, gateway: `${BASE}65`, subnet: `${BASE}64`, wildcard: '0.0.0.31', accessSwitch: 'TS', policyName: 'TEACHER_POLICY' }),
+  G1: Object.freeze({ name: '访客 G1', ip: `${BASE}130`, vlan: 40, prefix: 27, gateway: `${BASE}129`, subnet: `${BASE}128`, wildcard: '0.0.0.31', accessSwitch: 'GS', policyName: 'GUEST_POLICY' }),
+});
+const TARGETS = Object.freeze({
+  public: Object.freeze({ node: 'PUB', name: '公共教学网站', ip: `${BASE}100`, vlan: 30, gateway: `${BASE}97`, website: true }),
+  course: Object.freeze({ node: 'COURSE', name: '课程网站', ip: `${BASE}102`, vlan: 30, gateway: `${BASE}97`, website: true }),
+  lab: Object.freeze({ node: 'LAB', name: '受限实验网站', ip: `${BASE}101`, vlan: 30, gateway: `${BASE}97`, website: true }),
+  teacher: Object.freeze({ node: 'TA', name: '教师电脑 TA', ip: `${BASE}66`, vlan: 20, gateway: `${BASE}65`, website: false }),
+  management: Object.freeze({ node: 'AUTH', name: '管理区 AUTH-PC', ip: `${BASE}114`, vlan: 99, gateway: `${BASE}113`, website: false }),
+});
 const PROTOCOLS = Object.freeze({ http: 'HTTP / TCP 80', icmp: 'ICMP Echo（ping）', ssh: 'SSH / TCP 22' });
-const VALID_FAULTS = Object.freeze(['none', 'order', 'http_off', 'trunk']);
+const FAULTS = Object.freeze(['none', 'order', 'http_off', 'trunk']);
+const GRANT_ACTORS = Object.freeze(['SA', 'SB', 'G1']);
+const GRANT_TARGETS = Object.freeze(['course', 'lab']);
 
-function row(seq, text, action, explanation, match) {
+/** Each call returns independent, mutable per-actor and per-website state. */
+function createGrants() {
+  return { SA: { course: false, lab: false }, SB: { course: false, lab: false }, G1: { course: false, lab: false } };
+}
+
+function normalizePolicy(options = {}) {
+  if (options === null || typeof options !== 'object' || Array.isArray(options)) throw new TypeError('options 必须是对象。');
+  const actor = options.actor ?? 'SA';
+  const fault = options.fault ?? 'none';
+  const grants = options.grants ?? createGrants();
+  if (typeof actor !== 'string' || !Object.hasOwn(ACTORS, actor)) throw new TypeError('actor 必须是 SA、SB、TA 或 G1。');
+  if (!FAULTS.includes(fault)) throw new TypeError('fault 必须是 none、order、http_off 或 trunk。');
+  if (grants === null || typeof grants !== 'object' || Array.isArray(grants)) throw new TypeError('grants 必须是 createGrants() 所定义的授权对象。');
+  for (const key of GRANT_ACTORS) {
+    if (!Object.hasOwn(grants, key) || grants[key] === null || typeof grants[key] !== 'object' || Array.isArray(grants[key])) {
+      throw new TypeError(`grants.${key} 必须包含 course 和 lab 布尔值。`);
+    }
+    for (const target of GRANT_TARGETS) {
+      if (!Object.hasOwn(grants[key], target) || typeof grants[key][target] !== 'boolean') {
+        throw new TypeError(`grants.${key}.${target} 必须是布尔值。`);
+      }
+    }
+  }
+  return { actor, fault, grants };
+}
+
+function normalize(options = {}) {
+  const normalized = normalizePolicy(options);
+  const target = options.target ?? 'course';
+  const protocol = options.protocol ?? 'http';
+  if (typeof target !== 'string' || !Object.hasOwn(TARGETS, target)) throw new TypeError('target 必须是 public、course、lab、teacher 或 management。');
+  if (typeof protocol !== 'string' || !Object.hasOwn(PROTOCOLS, protocol)) throw new TypeError('protocol 必须是 http、icmp 或 ssh。');
+  const faultTarget = options.faultTarget ?? (TARGETS[target].website ? target : 'lab');
+  if (!['public', 'course', 'lab'].includes(faultTarget)) throw new TypeError('faultTarget 必须是 public、course 或 lab。');
+  if (normalized.actor === 'TA' && !TARGETS[target].website) {
+    throw new TypeError('教师 TA 仅演示三个 HTTP 网站；teacher 和 management 诊断目标不适用，不假设同 VLAN 流量经过 R1。');
+  }
+  return { ...normalized, target, protocol, faultTarget };
+}
+
+function row(seq, text, action, explanation, match = {}) {
   return Object.freeze({ seq, text, action, explanation, match: Object.freeze(match) });
 }
 
-/** Baseline: no student is authorized for the lab website. */
-const POLICY_ROWS = Object.freeze([
-  row(10, 'permit tcp 192.168.10.0 0.0.0.63 host 192.168.10.100 eq 80', 'permit', '学生可访问公共教学网站的 HTTP 服务。', { target: 'public', protocol: 'http' }),
-  row(20, 'permit icmp 192.168.10.0 0.0.0.63 host 192.168.10.1 echo', 'permit', '学生可 ping 自己的网关；此规则不会放行到服务器的 ping。', { target: 'gateway', protocol: 'icmp' }),
-  row(70, 'deny ip any 192.168.10.64 0.0.0.31', 'deny', '学生不能访问教师 VLAN 20。', { target: 'teacher' }),
-  row(80, 'deny ip any 192.168.10.112 0.0.0.15', 'deny', '学生不能访问管理 VLAN 99。设备 VTY 仍应另设来源限制。', { target: 'management' }),
-  row(90, 'deny ip any any', 'deny', '拒绝其他未明确放行的学生跨 VLAN 流量。', {}),
-]);
+function websitePermit(seq, source, target, explanation) {
+  return row(seq, `permit tcp ${source.subnet} ${source.wildcard} host ${TARGETS[target].ip} eq 80`, 'permit', explanation, { target, protocol: 'http' });
+}
 
-/** UI may use this to display the precise list that evaluateAccess evaluates. */
-function getPolicyRows({ authorized = false, fault = 'none' } = {}) {
-  const rules = [...POLICY_ROWS];
-  if (authorized) {
-    rules.push(row(fault === 'order' ? 95 : 30,
-      'permit tcp host 192.168.10.11 host 192.168.10.101 eq 80',
-      'permit', '只允许 Student-A 访问实验网站 TCP 80；不放行 ping、SSH 或 Student-B。',
-      { student: 'A', target: 'lab', protocol: 'http' }));
+function grantPermit(actor, target, seq) {
+  return row(seq, `permit tcp host ${ACTORS[actor].ip} host ${TARGETS[target].ip} eq 80`, 'permit',
+    `只允许 ${ACTORS[actor].name} 的源 IP ${ACTORS[actor].ip} 访问${TARGETS[target].name}的 TCP 80；不授权其他来源、网站、ping 或 SSH。`,
+    { actor, target, protocol: 'http' });
+}
+
+/** Return exactly the source policy evaluated for this actor, in ACL order. */
+function getPolicyRows(options = {}) {
+  const input = normalizePolicy(options);
+  const source = ACTORS[input.actor];
+  const teacher = input.actor === 'TA';
+  const guest = input.actor === 'G1';
+  const rules = [websitePermit(10, source, 'public', `${teacher ? '教师' : guest ? '访客' : '学生'}子网可访问公共教学网站的 HTTP 服务。`)];
+  if (teacher) {
+    rules.push(websitePermit(11, source, 'course', '教师子网默认可访问课程网站的 HTTP 服务，无需学生或访客授权。'));
+    rules.push(websitePermit(12, source, 'lab', '教师子网默认可访问实验网站的 HTTP 服务，无需学生或访客授权。'));
   }
+  rules.push(row(20, `permit icmp ${source.subnet} ${source.wildcard} host ${source.gateway} echo`, 'permit',
+    `只放行本子网到自身网关 ${source.gateway} 的 ICMP Echo；不会放行服务器的 ping。`, { target: 'gateway', protocol: 'icmp' }));
+
+  if (!teacher) {
+    const assignments = guest
+      ? [['G1', 'course', 30, 95], ['G1', 'lab', 31, 96]]
+      : [['SA', 'course', 30, 95], ['SA', 'lab', 31, 96], ['SB', 'course', 40, 97], ['SB', 'lab', 41, 98]];
+    for (const [actor, target, seq, faultySeq] of assignments) {
+      if (input.grants[actor][target]) rules.push(grantPermit(actor, target, input.fault === 'order' ? faultySeq : seq));
+    }
+  }
+
+  rules.push(row(70, teacher ? `deny ip any ${BASE}0 0.0.0.63` : `deny ip any ${BASE}64 0.0.0.31`, 'deny',
+    teacher ? '教师不能访问学生 VLAN 10。' : '学生和访客不能访问教师 VLAN 20。', { target: teacher ? 'student' : 'teacher' }));
+  rules.push(row(75, guest ? `deny ip any ${BASE}0 0.0.0.63` : `deny ip any ${BASE}128 0.0.0.31`, 'deny',
+    guest ? '访客不能访问学生 VLAN 10。' : '学生和教师不能访问访客 VLAN 40。', { target: guest ? 'student' : 'guest' }));
+  rules.push(row(80, `deny ip any ${BASE}112 0.0.0.15`, 'deny', '禁止访问管理 VLAN 99；设备 VTY 还应单独限制管理来源。', { target: 'management' }));
+  rules.push(row(90, 'deny ip any any', 'deny', '拒绝其他没有明确许可的跨 VLAN 流量。'));
   return rules.sort((a, b) => a.seq - b.seq);
 }
 
-const activePolicyRows = getPolicyRows;
-
-function normalize(options = {}) {
-  const normalized = {
-    student: options.student ?? 'A',
-    target: options.target ?? 'lab',
-    protocol: options.protocol ?? 'http',
-    authorized: options.authorized ?? false,
-    fault: options.fault ?? 'none',
-  };
-  if (!Object.hasOwn(SOURCES, normalized.student)) throw new TypeError('student 必须是 A 或 B。');
-  if (!Object.hasOwn(TARGETS, normalized.target)) throw new TypeError('target 必须是 public、lab、teacher 或 management。');
-  if (!Object.hasOwn(PROTOCOLS, normalized.protocol)) throw new TypeError('protocol 必须是 http、icmp 或 ssh。');
-  if (typeof normalized.authorized !== 'boolean') throw new TypeError('authorized 必须是布尔值。');
-  if (!VALID_FAULTS.includes(normalized.fault)) throw new TypeError('fault 必须是 none、order、http_off 或 trunk。');
-  return normalized;
-}
-
-function matchingRule(options) {
-  return getPolicyRows(options).find((rule) =>
-    Object.entries(rule.match).every(([field, value]) => options[field] === value));
-}
-
-function requestPath(source, target) {
-  const start = [source, 'SS', 'CORE', 'R1', 'CORE'];
-  return target === 'teacher' ? [...start, 'TS', 'TA'] : [...start, TARGETS[target]];
+function requestPath(actor, target) {
+  const start = [actor, ACTORS[actor].accessSwitch, 'CORE', 'R1', 'CORE'];
+  return target === 'teacher' ? [...start, 'TS', 'TA'] : [...start, TARGETS[target].node];
 }
 
 /**
- * Evaluate one new request. This is stateless ACL matching, not session auth.
- * `authorized` grants only A -> LAB HTTP, independent of selected student.
- * The HTTP-off challenge disables the website selected as the target.
+ * Evaluate a new request; no sessions, identity authentication or persistent
+ * browser caches are simulated. TA has website baselines and no grant state.
+ * faultTarget fixes which site's HTTP service is down across a comparison table.
  */
 function evaluateAccess(options = {}) {
   const input = normalize(options);
-  const source = SOURCES[input.student];
-  const matched = matchingRule(input);
+  const source = ACTORS[input.actor];
+  const target = TARGETS[input.target];
+  const matched = getPolicyRows(input).find(rule => Object.entries(rule.match).every(([field, value]) => input[field] === value));
   const networkAllowed = matched.action === 'permit';
-  const websiteTarget = input.target === 'public' || input.target === 'lab';
-  const connectivityAvailable = !(input.fault === 'trunk' && websiteTarget);
-  const serviceAvailable = !(input.fault === 'http_off' && websiteTarget && input.protocol === 'http');
+  const connectivityAvailable = !(input.fault === 'trunk' && target.website);
+  const serviceAvailable = !(input.fault === 'http_off' && input.target === input.faultTarget && input.protocol === 'http');
   const rule = Object.freeze({ seq: matched.seq, text: matched.text });
-  const start = [source, 'SS', 'CORE', 'R1'];
-  const common = { networkAllowed, connectivityAvailable, serviceAvailable, rule };
+  const common = { networkAllowed, connectivityAvailable, serviceAvailable, rule, policyName: source.policyName };
+  const start = [input.actor, source.accessSwitch, 'CORE', 'R1'];
 
   if (!networkAllowed) {
-    let reason = `R1 学生 VLAN 子接口的入方向 ACL 首先匹配第 ${rule.seq} 条 deny，请求在 R1 被丢弃。`;
-    if (input.target === 'lab' && input.student === 'A' && input.authorized && input.fault === 'order' && input.protocol === 'http') {
-      reason += '授权许可放在第 95 条；第 90 条已先拒绝，因此第 95 条不会被执行。';
-    } else if (input.target === 'lab' && input.protocol !== 'http' && input.authorized) {
-      reason += '授权只针对 HTTP / TCP 80，不包含 ping 或 SSH。';
-    } else if (input.target === 'lab' && input.student === 'B' && input.authorized) {
-      reason += '授权只针对源 IP 192.168.10.11；Student-B 的 .12 不匹配。';
+    let reason = `R1 的 VLAN ${source.vlan} 子接口入方向 ${source.policyName} 首先匹配第 ${rule.seq} 条 deny，请求在 R1 被丢弃。`;
+    if (GRANT_TARGETS.includes(input.target) && input.actor !== 'TA' && input.grants[input.actor][input.target] && input.protocol === 'http' && input.fault === 'order') {
+      const lateRule = getPolicyRows(input).find(candidate => candidate.action === 'permit' && candidate.match.actor === input.actor && candidate.match.target === input.target);
+      reason += `本来源、本网站的授权许可位于第 ${lateRule.seq} 条，但第 90 条已经结束检查，后面的 permit 不会执行。`;
+    } else if (target.website && input.protocol !== 'http') {
+      reason += '网站许可只覆盖 HTTP / TCP 80，不包含服务器的 ping 或 SSH；网站授权不会放行其他协议。';
+    } else if (GRANT_TARGETS.includes(input.target) && input.actor !== 'TA') {
+      reason += `${source.name} 尚未获得${target.name}的 HTTP 授权；其他来源或另一个网站的授权不适用于这次请求。`;
     }
     return { ...common, allowed: false, reason, path: start, phase: 'acl_denied' };
   }
-
   if (!connectivityAvailable) {
     return { ...common, allowed: false,
-      reason: `第 ${rule.seq} 条 ACL 已允许请求，但 R1 到 CORE 的 trunk 未允许 VLAN 30；报文无法送到服务器 VLAN。这是路径故障，不能解释成 ACL 拒绝。`,
+      reason: `第 ${rule.seq} 条 ACL 已许可，但 R1—CORE trunk 遗漏 VLAN 30，无法把请求送到服务器 VLAN；这是链路配置故障。`,
       path: [...start, 'CORE'], phase: 'link_failure' };
   }
-
   if (!serviceAvailable) {
     return { ...common, allowed: false,
-      reason: `第 ${rule.seq} 条 ACL 允许 HTTP，路径也可达；${NAMES[input.target]}的 HTTP 服务关闭，因此不能得到网页响应。`,
-      path: requestPath(source, input.target), phase: 'service_failure' };
+      reason: `第 ${rule.seq} 条 ACL 许可 HTTP，路径也可达；当前选中的${target.name} HTTP 服务关闭，因此没有网页响应。`,
+      path: requestPath(input.actor, input.target), phase: 'service_failure' };
   }
-
   return { ...common, allowed: true,
-    reason: `第 ${rule.seq} 条 ACL 允许 ${PROTOCOLS[input.protocol]}；服务器 HTTP 服务开启，请求与响应可完成。`,
-    path: requestPath(source, input.target), phase: 'success' };
+    reason: `第 ${rule.seq} 条 ${source.policyName} 许可 ${PROTOCOLS[input.protocol]}；${target.name}服务开启，请求和响应可以完成。`,
+    path: requestPath(input.actor, input.target), phase: 'success' };
 }
 
-/**
- * Teaching storyboard, not a full ARP/TCP/IP simulation.
- * ARP/neighbour caches are assumed ready after the first explanation.
- * MAC headers change at R1 while normal end-to-end source/destination IPs stay.
- */
+/** Explain the evaluated request, stopping at its actual point of failure. */
 function buildJourney(options = {}) {
   const input = normalize(options);
   const result = evaluateAccess(input);
-  const source = SOURCES[input.student];
+  const source = ACTORS[input.actor];
   const target = TARGETS[input.target];
-  const sourceIP = IPS[source];
-  const targetIP = IPS[target];
   const steps = [
     {
       title: '先判断：目的地在另一个 VLAN',
-      description: `Student-${input.student}（${sourceIP}/26）要访问 ${NAMES[input.target]}（${targetIP}）。目的地址不在学生子网，先交给默认网关 192.168.10.1。`,
-      path: [source], phase: 'check',
-      detail: '主机先用 ARP 获得网关 MAC。本动画只解释这一点，后续假设 ARP 缓存已就绪；不逐个播放 ARP、TCP 握手或重传。源 IP 只是地址，并不能证明学生的真实身份。',
+      description: `${source.name}（${source.ip}/${source.prefix}）访问${target.name}（${target.ip}）。目的地址不在本地子网，先交给默认网关 ${source.gateway}。`,
+      path: [input.actor], phase: 'check',
+      detail: '本教学模型假设 ARP 缓存已就绪：主机已知道网关 MAC，路由器已知道目的设备 MAC。源 IP 是网络地址，不能证明真实身份；动画不会逐个模拟 ARP、TCP 握手或重传。',
     },
     {
       title: '交换机把帧送到网关',
-      description: '学生接入交换机 SS 把 VLAN 10 的以太网帧送到 CORE，再经 trunk 交给 R1 的 VLAN 10 子接口。交换机按目的 MAC 转发。',
-      path: [source, 'SS', 'CORE', 'R1'], phase: 'request',
-      detail: `帧的目的 MAC 是网关的 MAC；IP 目的地址仍是 ${targetIP}。单臂路由中 CORE → R1 与 R1 → CORE 使用同一条物理 trunk 的不同 VLAN。`,
+      description: `${source.accessSwitch} 把 VLAN ${source.vlan} 的帧送到 CORE，再经 trunk 送入 R1 的 VLAN ${source.vlan} 子接口。交换机按目的 MAC 转发。`,
+      path: [input.actor, source.accessSwitch, 'CORE', 'R1'], phase: 'request',
+      detail: `帧的目的 MAC 是本子网网关的 MAC；IP 目的地址仍是 ${target.ip}。CORE → R1 与 R1 → CORE 使用同一条物理 trunk、不同 VLAN 的封装。`,
     },
     {
       title: '在 R1 检查第一条匹配的 ACL',
-      description: `学生流量进入 R1 时，STUDENT_POLICY 按序号从小到大检查。当前首条匹配规则是第 ${result.rule.seq} 条。`,
+      description: `${result.policyName} 在来源 VLAN ${source.vlan} 的入方向按序号检查，第一条匹配规则是第 ${result.rule.seq} 条。`,
       path: ['R1'], phase: 'check',
-      detail: `${result.rule.seq} ${result.rule.text}${input.authorized && input.fault === 'order' ? '\n授权许可在第 95 条，前面的 deny 可能已结束检查。' : '\n第一条匹配即决定结果，不会继续寻找更后面的 permit。'}`,
+      detail: `${result.rule.seq} ${result.rule.text}\n第一条匹配即结束检查，不会继续寻找后面的 permit。授权行只匹配指定来源、指定网站和 TCP 80。`,
     },
   ];
 
   if (result.phase === 'acl_denied') {
     steps.push({ title: '请求在 R1 被拒绝', description: result.reason, path: ['R1'], phase: 'failure',
-      detail: '请求未到达目标设备，因此不会出现服务器的成功响应。检查源地址、目标地址、协议与 ACL 顺序；不要用放行所有流量来修复。' });
+      detail: '请求尚未到达目标设备，因此没有目标设备的成功响应。先核对来源、网站、协议和规则顺序；故障挑战不会改变 ACL 首条匹配的含义。' });
     return steps;
   }
-
   if (result.phase === 'link_failure') {
-    steps.push({ title: 'ACL 许可后，路径仍然可能中断', description: result.reason,
-      path: ['R1', 'CORE'], phase: 'failure',
-      detail: '许可结果保持为 permit；故障位于 R1—CORE trunk 的 VLAN 30 允许列表。检查 show interfaces trunk 与子接口状态，恢复 VLAN 30 后再重测。' });
+    steps.push({ title: 'ACL 许可后，路径中断', description: result.reason, path: ['R1', 'CORE'], phase: 'failure',
+      detail: 'ACL 结果仍是 permit。检查 R1—CORE trunk 的 VLAN 30 允许列表和子接口状态；恢复 VLAN 30 后再发起一次新的访问。' });
     return steps;
   }
 
-  steps.push({ title: `R1 转发到 VLAN ${VLAN[input.target]}`,
-    description: `ACL 已允许请求。R1 查询直连路由，重新封装目标 VLAN 的帧，经 CORE 送到${NAMES[input.target]}。`,
-    path: ['R1', 'CORE', ...(input.target === 'teacher' ? ['TS', 'TA'] : [target])], phase: 'request',
-    detail: `IP 源/目的仍为 ${sourceIP} → ${targetIP}；R1 修改链路层 MAC 封装并递减 TTL。这些 VLAN 都直连 R1，核心方案不需要静态路由。` });
-
+  steps.push({ title: 'R1 转发到服务器 VLAN 30',
+    description: `ACL 已许可，R1 查询直连路由并重新封装 VLAN 30 的以太网帧，经 CORE 送到${target.name}。`,
+    path: ['R1', 'CORE', target.node], phase: 'request',
+    detail: `IP 源／目的保持 ${source.ip} → ${target.ip}；R1 修改链路层 MAC 封装并递减 TTL。这些 VLAN 都直连 R1，无需静态路由。` });
   if (result.phase === 'service_failure') {
-    steps.push({ title: '到了服务器，却没有 HTTP 服务', description: result.reason, path: [target], phase: 'failure',
-      detail: '网络许可不等于应用正在运行。在 Packet Tracer 的 Server → Services → HTTP 中恢复 HTTP，再用 PC 浏览器访问。ping 无法代替网页验证。' });
+    steps.push({ title: '到了服务器，却没有 HTTP 服务', description: result.reason, path: [target.node], phase: 'failure',
+      detail: '网络许可不等于应用正在运行。恢复当前网站的 HTTP 服务后，用浏览器重测；服务器 ping 在本策略中仍会被拒绝，不能用它替代网页验证。' });
     return steps;
   }
 
-  steps.push({ title: 'HTTP 服务器处理访问请求',
-    description: `${NAMES[input.target]} HTTP 服务开启，生成网页响应。访问许可是指定源 IP 到指定服务的网络规则。`,
-    path: [target], phase: 'check',
-    detail: '课堂动画用一个请求和一个响应代表网页访问，没有逐项模拟 TCP 握手、ACK、重传与所有分段。' });
-  steps.push({ title: '响应按回程路径返回学生电脑',
-    description: '服务器把跨 VLAN 响应交给自己的网关；R1 再经学生 VLAN 送回原来的学生电脑。',
+  steps.push({ title: 'HTTP 服务器生成网页响应',
+    description: `${target.name}的 HTTP 服务开启，处理访问请求并生成响应。`,
+    path: [target.node], phase: 'check',
+    detail: '一组 HTTP 请求／响应代表这次网站访问；动画不逐项模拟 TCP 握手、ACK、重传或全部分段，也不验证真实身份。' });
+  steps.push({ title: `响应沿完整回程返回${source.name}`,
+    description: `服务器把跨 VLAN 响应交给网关 ${target.gateway}，经 CORE → R1 → CORE，再从 VLAN ${source.vlan} 和 ${source.accessSwitch} 回到 ${input.actor}。`,
     path: [...result.path].reverse(), phase: 'reply',
-    detail: `响应 IP 为 ${targetIP} → ${sourceIP}。学生 ACL 只应用于 VLAN 10 子接口入方向；这次响应从服务器 VLAN 进入 R1，不会再次经过该入方向规则。` });
-  steps.push({ title: '这次新访问成功', description: result.reason, path: [source], phase: 'success',
-    detail: input.target === 'lab'
-      ? '再试 Student-B 或切换到 ping，结果仍应被拒绝。撤销授权后发起新的 HTTP 请求验证；已缓存或已下载的网页不会自动消失。'
-      : '公共网站是基线许可。即使没有实验网站授权，学生也能访问它；教师区和管理区仍保持隔离。' });
+    detail: `响应 IP 为 ${target.ip} → ${source.ip}。${source.policyName} 只应用于来源 VLAN ${source.vlan} 子接口的入方向；这次响应从 VLAN 30 进入 R1，不会再次经过该入方向 ACL。` });
+  steps.push({ title: '这次新访问成功', description: result.reason, path: [input.actor], phase: 'success',
+    detail: input.actor === 'TA'
+      ? '教师访问三个 HTTP 网站属于基线许可，无需授予课程或实验网站权限；服务器 ping 和 SSH 仍不会放行。'
+      : input.target === 'public'
+        ? '公共网站 HTTP 是基线许可。课程与实验网站要分别授权，教师区和管理区仍保持隔离。'
+        : `此许可只适用于 ${input.actor} → ${target.node} 的 TCP 80。换来源、换网站或换协议后要重新判断；撤销后验证一次新的请求，已经缓存或下载的网页不会自动消失。` });
   return steps;
 }
 
@@ -378,38 +757,43 @@ function buildJourney(options = {}) {
 
 const $ = (id) => document.getElementById(id);
 const escapeHTML = (value) => String(value).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const state = { lesson: 0, view: 'demo', student: 'A', target: 'lab', protocol: 'http', authorized: false, fault: 'none', step: 0, speed: 1, playing: false, presentation: false };
+const state = { lesson: 0, view: 'demo', actor: 'G1', target: 'public', protocol: 'http', grants: createGrants(), grantActor: 'SA', grantWebsite: 'course', fault: 'none', step: 0, speed: 1, playing: false, presentation: false };
 const answers = new Map();
 let journey = [];
 let timer;
 let animationFrame;
 let animationGeneration = 0;
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-const TARGET_NAMES = {public:'公共网站',lab:'实验网站',teacher:'教师电脑',management:'管理区 AUTH-PC'};
+const TARGET_NAMES = {public:'公开网站',course:'课程网站',lab:'实验网站',teacher:'教师电脑',management:'管理区 AUTH-PC'};
+const ACTOR_NAMES = {SA:'学生 A · Student-A',SB:'学生 B · Student-B',TA:'教师 · Teacher-A',G1:'访客 · Guest-1'};
 const PROTOCOL_NAMES = {http:'HTTP',icmp:'ping / ICMP',ssh:'SSH'};
 const NODES = {
-  SA:{x:100,y:165,name:'Student-A',ip:'192.168.10.11',mask:'255.255.255.192',gateway:'192.168.10.1',vlan:10,role:'学生电脑；授权按这个固定源 IP 匹配。'},
-  SB:{x:100,y:365,name:'Student-B',ip:'192.168.10.12',mask:'255.255.255.192',gateway:'192.168.10.1',vlan:10,role:'未授权学生；用来验证是否意外开放了所有学生。'},
-  SS:{x:225,y:265,name:'STU-SW',ip:'192.168.10.116',mask:'255.255.255.240',gateway:'192.168.10.113',vlan:99,role:'学生接入交换机。Fa0/1、Fa0/2 属于 VLAN 10；G0/1 为 trunk。这里的 IP 是管理 SVI，不是学生网关。'},
-  CORE:{x:435,y:265,name:'CORE-SW',ip:'192.168.10.115',mask:'255.255.255.240',gateway:'192.168.10.113',vlan:99,role:'核心二层交换机。Fa0/1 到 R1，G0/1、G0/2 到接入交换机，均为 trunk。Fa0/2、Fa0/3 接服务器 VLAN 30，Fa0/4 接 AUTH-PC VLAN 99。'},
-  R1:{x:600,y:265,name:'R1',role:'四个 VLAN 的网关。G0/0.10 入方向应用学生 ACL；跨 VLAN 先检查规则，再查询直连路由。AUTH-PC 通过 .113 进行 SSH 管理。'},
-  TS:{x:800,y:110,name:'TCH-SW',ip:'192.168.10.117',mask:'255.255.255.240',gateway:'192.168.10.113',vlan:99,role:'教师接入交换机。Fa0/1、Fa0/2 属于 VLAN 20；G0/1 为 trunk。管理 SVI 属于 VLAN 99。'},
-  TA:{x:945,y:88,name:'Teacher-A',ip:'192.168.10.66',mask:'255.255.255.224',gateway:'192.168.10.65',vlan:20,role:'普通教师电脑；可访问两个网站。设备管理入口只接受 AUTH-PC，教师身份本身不会自动获得管理权限。'},
-  TB:{x:945,y:160,name:'Teacher-B',ip:'192.168.10.67',mask:'255.255.255.224',gateway:'192.168.10.65',vlan:20,role:'普通教师电脑；与 Teacher-A 使用相同的网站访问政策。'},
-  PUB:{x:935,y:300,name:'PUBLIC-SRV',ip:'192.168.10.100',mask:'255.255.255.240',gateway:'192.168.10.97',vlan:30,role:'公共课程资料 HTTP 网站。学生基线许可允许 TCP 80，不代表允许对它 ping 或 SSH。'},
-  LAB:{x:935,y:397,name:'LAB-SRV',ip:'192.168.10.101',mask:'255.255.255.240',gateway:'192.168.10.97',vlan:30,role:'受限实验资源 HTTP 网站；只有获许可的 Student-A 可以访问 TCP 80。服务器放在独立 VLAN，使访问经过路由器 ACL。'},
-  AUTH:{x:935,y:545,name:'AUTH-PC',ip:'192.168.10.114',mask:'255.255.255.240',gateway:'192.168.10.113',vlan:99,role:'授权教师使用的专用管理终端。向 R1 .113 发起 SSH 并修改 ACL；它本身不是本实验的 SSH 服务端。'}
+  SA:{x:120,y:125,name:'Student-A',kind:'pc',ip:'192.168.10.11',mask:'255.255.255.192',gateway:'192.168.10.1',vlan:10,role:'学生电脑；课程与实验网站分别授权，按固定源 IP 匹配。'},
+  SB:{x:120,y:250,name:'Student-B',kind:'pc',ip:'192.168.10.12',mask:'255.255.255.192',gateway:'192.168.10.1',vlan:10,role:'第二名学生；验证给 A 授权不会自动开放给 B。也可以为 B 设置独立许可。'},
+  SS:{x:290,y:187,name:'STU-SW',kind:'switch',ip:'192.168.10.116',mask:'255.255.255.240',gateway:'192.168.10.113',vlan:99,role:'学生接入交换机。Fa0/1、Fa0/2 属于 VLAN 10；G0/1 为 trunk。此地址是管理 SVI，不是学生网关。'},
+  G1:{x:120,y:495,name:'Guest-1',kind:'pc',ip:'192.168.10.130',mask:'255.255.255.224',gateway:'192.168.10.129',vlan:40,role:'访客电脑；默认只开放公开网站，教师可分别开放课程或实验 HTTP 服务。'},
+  GS:{x:290,y:420,name:'GUEST-SW',kind:'switch',ip:'192.168.10.118',mask:'255.255.255.240',gateway:'192.168.10.113',vlan:99,role:'访客接入交换机。Fa0/1 为 VLAN 40；G0/1 trunk 接 CORE Fa0/5。管理 SVI 属于 VLAN 99。'},
+  CORE:{x:520,y:320,name:'CORE-SW',kind:'switch',ip:'192.168.10.115',mask:'255.255.255.240',gateway:'192.168.10.113',vlan:99,role:'核心二层交换机。Fa0/1 到 R1，G0/1、G0/2、Fa0/5 到三个接入交换机，均为 trunk。Fa0/2、Fa0/3、Fa0/6 接三个服务器 VLAN 30；Fa0/4 接 AUTH-PC VLAN 99。'},
+  R1:{x:700,y:185,name:'R1',kind:'router',role:'五个 VLAN 的网关；学生 .10、访客 .40、教师 .20 入方向分别使用各自 ACL。AUTH-PC 通过 .113 SSH 管理。跨 VLAN 从 CORE 到 R1 后，再返回 CORE。'},
+  TS:{x:945,y:160,name:'TCH-SW',kind:'switch',ip:'192.168.10.117',mask:'255.255.255.240',gateway:'192.168.10.113',vlan:99,role:'教师接入交换机。Fa0/1、Fa0/2 属于 VLAN 20，G0/1 为 trunk；管理 SVI 属于 VLAN 99。'},
+  TA:{x:1140,y:105,name:'Teacher-A',kind:'pc',ip:'192.168.10.66',mask:'255.255.255.224',gateway:'192.168.10.65',vlan:20,role:'教师默认能访问公开、课程、实验三个 HTTP 网站。修改设备配置时需使用专用 AUTH-PC，不由这台普通教师电脑 SSH 登录。'},
+  TB:{x:1140,y:230,name:'Teacher-B',kind:'pc',ip:'192.168.10.67',mask:'255.255.255.224',gateway:'192.168.10.65',vlan:20,role:'与 Teacher-A 使用相同的三网站政策。教师全网站许可不等于设备管理或学生远程控制权限。'},
+  PUB:{x:1100,y:400,name:'PUBLIC-SRV',kind:'server',ip:'192.168.10.100',mask:'255.255.255.240',gateway:'192.168.10.97',vlan:30,label:'公开网站',role:'学校介绍与公开教学资源。学生、教师和访客都能使用 HTTP / TCP 80。'},
+  COURSE:{x:1100,y:490,name:'COURSE-SRV',kind:'server',ip:'192.168.10.102',mask:'255.255.255.240',gateway:'192.168.10.97',vlan:30,label:'课程网站',role:'课程讲义和课堂资料。教师默认开放，学生及访客需获得该网站的独立 HTTP 许可。'},
+  LAB:{x:1100,y:580,name:'LAB-SRV',kind:'server',ip:'192.168.10.101',mask:'255.255.255.240',gateway:'192.168.10.97',vlan:30,label:'实验网站',role:'受限实验资源。教师默认开放，学生及访客单独申请；课程许可不会同时开放这里。'},
+  AUTH:{x:760,y:707,name:'AUTH-PC',kind:'pc',ip:'192.168.10.114',mask:'255.255.255.240',gateway:'192.168.10.113',vlan:99,role:'授权教师使用的专用管理终端。向 R1 .113 发起 SSH 并修改指定学生或访客的指定网站许可；不是 SSH 服务端。'}
 };
 const PLAN = [
   ['学生区',10,'192.168.10.0/26','255.255.255.192','.1','.11 / .12','62'],
   ['教师区',20,'192.168.10.64/27','255.255.255.224','.65','.66 / .67','30'],
-  ['服务器区',30,'192.168.10.96/28','255.255.255.240','.97','.100 / .101','14'],
-  ['管理区',99,'192.168.10.112/28','255.255.255.240','.113','.114–.117','14']
+  ['服务器区',30,'192.168.10.96/28','255.255.255.240','.97','.100 / .101 / .102','14'],
+  ['管理区',99,'192.168.10.112/28','255.255.255.240','.113','.114–.118','14'],
+  ['访客区',40,'192.168.10.128/27','255.255.255.224','.129','.130','30']
 ];
 const nodeElements = new Map();
-const LINKS = [['SA','SS'],['SB','SS'],['SS','CORE'],['CORE','R1'],['CORE','TS'],['TS','TA'],['TS','TB'],['CORE','PUB'],['CORE','LAB'],['CORE','AUTH']];
+const LINKS = [['SA','SS'],['SB','SS'],['SS','CORE'],['G1','GS'],['GS','CORE'],['CORE','R1'],['CORE','TS'],['TS','TA'],['TS','TB'],['CORE','PUB'],['CORE','COURSE'],['CORE','LAB'],['CORE','AUTH']];
 
-function requestOptions(extra = {}) { return {student:state.student,target:state.target,protocol:state.protocol,authorized:state.authorized,fault:state.fault,...extra}; }
+function requestOptions(extra = {}) { return {actor:state.actor,target:state.target,protocol:state.protocol,grants:state.grants,fault:state.fault,faultTarget:['public','course','lab'].includes(state.target) ? state.target : 'lab',...extra}; }
 function statusLabel(result) { return result.allowed ? '允许访问' : result.networkAllowed ? '许可已通过，访问失败' : '被 ACL 拒绝'; }
 
 function setView(view, focus = false) {
@@ -453,13 +837,13 @@ function renderLearning() {
   const lesson = CAMPUS_LESSONS[state.lesson];
   let extra = '';
   if (lesson.id === 'zones') {
-    extra = `<div class="policy-matrix"><h3>我们想要的访问结果</h3><div class="table-scroll"><table><caption>正常网络与服务下的新请求</caption><thead><tr><th>发起者</th><th>公共网页</th><th>实验网页</th><th>设备 SSH</th></tr></thead><tbody><tr><th>学生 A · 未授权</th><td>允许</td><td>拒绝</td><td>拒绝</td></tr><tr><th>学生 A · 已授权</th><td>允许</td><td>允许 TCP 80</td><td>拒绝</td></tr><tr><th>学生 B</th><td>允许</td><td>拒绝</td><td>拒绝</td></tr><tr><th>普通教师</th><td>允许</td><td>允许</td><td>拒绝</td></tr><tr><th>AUTH-PC</th><td>允许</td><td>允许</td><td>认证后允许</td></tr></tbody></table></div><p>所有学生对教师区和管理区的跨 VLAN 访问都拒绝。教师访问学生时，学生回包也可能被学生 ACL 拒绝；本方案不保证教师可远程控制学生。</p></div>`;
+    extra = `<div class="policy-matrix"><h3>三个网站，三类访问者</h3><div class="table-scroll"><table><caption>正常配置下的 HTTP 网站访问政策</caption><thead><tr><th>访问者</th><th>公开网站 .100</th><th>课程网站 .102</th><th>实验网站 .101</th></tr></thead><tbody><tr><th>学生</th><td>默认允许</td><td>单独授权</td><td>单独授权</td></tr><tr><th>教师</th><td>默认允许</td><td>默认允许</td><td>默认允许</td></tr><tr><th>访客 Guest</th><td>默认允许</td><td>单独授权</td><td>单独授权</td></tr></tbody></table></div><p>给 Guest-1 课程网站许可，只改变这台电脑到 .102 的 TCP 80；实验网站、其他电脑和设备管理权限继续按各自规则判断。</p></div>`;
   }
   if (lesson.id === 'address') {
     extra = `<div class="address-exercise"><div><span class="eyebrow">亲自算一算</span><h3>50 台学生电脑，加一个网关，够吗？</h3><p>改动人数和子网大小，比较需要的地址与可用容量。</p></div><div class="capacity-controls"><label>学生电脑数<input id="host-count" type="number" min="1" max="250" value="50"></label><label>子网前缀<select id="prefix"><option value="24">/24</option><option value="25">/25</option><option value="26" selected>/26</option><option value="27">/27</option><option value="28">/28</option><option value="29">/29</option><option value="30">/30</option></select></label><div id="capacity-result" role="status"></div></div></div>${addressTable()}`;
   }
   if (lesson.id === 'vlan') extra = `<div class="route-explanation"><h3>跨 VLAN 时，同一条线走两次</h3><p>学生 → CORE → <b>R1（VLAN 10）</b> → <b>CORE（VLAN 30）</b> → 服务器。R1 与 CORE 共用一根 trunk；去程带 VLAN 10 标签，R1 路由后用 VLAN 30 返回核心交换机。</p><button data-open-demo>用动画看这条路径</button></div>`;
-  if (lesson.id === 'acl' || lesson.id === 'grant' || lesson.id === 'trouble') extra = `<div class="route-explanation"><h3>先预测，再动手</h3><p>${lesson.id === 'trouble' ? '先授权 A，再加入一个故障。检查：ACL 是否许可？路径是否连通？HTTP 是否开启？' : 'A 未授权时请求实验 HTTP 会命中拒绝；授权后精确命中许可。换成 B 或 ping，再看第一条匹配有没有改变。'}</p><button data-open-demo>打开动画与授权实验</button></div>`;
+  if (lesson.id === 'acl' || lesson.id === 'grant' || lesson.id === 'trouble') extra = `<div class="route-explanation"><h3>先预测，再动手</h3><p>${lesson.id === 'trouble' ? '先为学生或访客开放一个网站，再加入故障。检查：ACL 是否许可？路径是否连通？所选网站的 HTTP 是否开启？' : '选择授权对象和网站，先预测结果。只给 A 课程许可，再比较 A 的实验网站、B 和访客的课程访问；授权不会自动扩散。'}</p><button data-open-demo>打开动画与授权实验</button></div>`;
   $('panel-learn').innerHTML = `<div class="concept-grid">${lesson.concepts.map((item,i) => `<article class="concept-card"><span class="concept-number">${String(i+1).padStart(2,'0')}</span><h3>${escapeHTML(item.title)}</h3><p>${escapeHTML(item.body)}</p><div class="example"><b>具体例子</b><p>${escapeHTML(item.example)}</p></div></article>`).join('')}</div>${extra}<details class="teaching-card" open><summary>怎么讲给同学 · 建议话术与提问</summary><ol>${lesson.teach.map(line => `<li>${escapeHTML(line)}</li>`).join('')}</ol><p>讲解顺序：先展示需求，再让同学预测，最后播放动画或在 Packet Tracer 验证。</p></details>`;
   document.querySelectorAll('[data-open-demo]').forEach(button => button.addEventListener('click',() => setView('demo',true)));
   if (lesson.id === 'address') {
@@ -480,7 +864,7 @@ function updateCapacity() {
 
 function renderLab() {
   const lesson = CAMPUS_LESSONS[state.lesson];
-  $('panel-lab').innerHTML = `<div class="lab-intro"><span class="eyebrow">第 ${lesson.number} 课 · 在 Packet Tracer 中完成</span><h3>${escapeHTML(lesson.subtitle)}</h3><p>按课程顺序搭建同一份实验。以下为参考配置；设备命令与 .pkt 尚需本机预实验。每段只在指定设备输入，遇到报错先核对型号与端口。</p></div><ol class="lab-steps">${lesson.lab.map((step,i) => `<li class="lab-step"><div class="lab-step-heading"><span class="step-number">${i+1}</span><h3>${escapeHTML(step.title)}</h3>${step.command ? `<button class="copy-command" data-command-index="${i}">复制这段命令</button>` : ''}</div><p>${escapeHTML(step.detail)}</p>${step.command ? `<pre tabindex="0"><code>${escapeHTML(step.command)}</code></pre><p class="copy-feedback" id="copy-feedback-${i}" role="status"></p>` : ''}</li>`).join('')}</ol><div class="lab-boundary"><b>实验文件怎么提交？</b><p>在 Packet Tracer 使用 File → Save As 保存 .pkt。提交正确的未授权、A 授权、撤销三种配置，并附访问测试表和截图；网站动画和截图不能代替可打开的 .pkt。具体命名与交付项按老师要求调整。</p></div>`;
+  $('panel-lab').innerHTML = `<div class="lab-intro"><span class="eyebrow">第 ${lesson.number} 课 · 在 Packet Tracer 中完成</span><h3>${escapeHTML(lesson.subtitle)}</h3><p>按课程顺序搭建同一份实验。以下为参考配置；设备命令与 .pkt 尚需本机预实验。每段只在指定设备输入，遇到报错先核对型号与端口。</p></div><ol class="lab-steps">${lesson.lab.map((step,i) => `<li class="lab-step"><div class="lab-step-heading"><span class="step-number">${i+1}</span><h3>${escapeHTML(step.title)}</h3>${step.command ? `<button class="copy-command" data-command-index="${i}">复制这段命令</button>` : ''}</div><p>${escapeHTML(step.detail)}</p>${step.command ? `<pre tabindex="0"><code>${escapeHTML(step.command)}</code></pre><p class="copy-feedback" id="copy-feedback-${i}" role="status"></p>` : ''}</li>`).join('')}</ol><div class="lab-boundary"><b>实验文件怎么提交？</b><p>在 Packet Tracer 使用 File → Save As 保存 .pkt。提交正确的默认受限、部分网站授权、撤销三种配置，并附访问测试表和截图；网站动画和截图不能代替可打开的 .pkt。具体命名与交付项按老师要求调整。</p></div>`;
   document.querySelectorAll('[data-command-index]').forEach(button => button.addEventListener('click',async () => {
     const index = Number(button.dataset.commandIndex);
     try { await navigator.clipboard.writeText(lesson.lab[index].command); $(`copy-feedback-${index}`).textContent = '已复制。请核对设备名称后逐段输入。'; }
@@ -519,10 +903,21 @@ function updateScore() {
 }
 
 function prepareTopology() {
-  const elements = [...$('devices').children];
-  Object.entries(NODES).forEach(([id,node],i) => {
-    const element = elements[i]; nodeElements.set(id,element);
-    element.setAttribute('role','button'); element.setAttribute('tabindex','0'); element.setAttribute('aria-label',`查看 ${node.name} 的地址与角色`); element.dataset.node = id;
+  $('network').setAttribute('viewBox','0 0 1280 780');
+  $('zones').innerHTML = [
+    [20,30,345,270,'#edf8ef','学生区 · VLAN 10'],
+    [20,380,345,210,'#e8f7fb','访客区 · VLAN 40'],
+    [870,30,385,270,'#eef4ff','教师区 · VLAN 20'],
+    [870,330,385,285,'#f5efff','三个网站 · VLAN 30'],
+    [440,645,815,120,'#fff5df','管理区 · VLAN 99']
+  ].map(([x,y,w,h,color,label]) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="18" fill="${color}"/><text x="${x+20}" y="${y+30}" class="zone-label">${label}</text>`).join('');
+  $('devices').innerHTML = Object.entries(NODES).map(([id,node]) => {
+    const width = node.kind === 'server' ? 220 : node.kind === 'switch' ? 144 : 170;
+    const caption = node.kind === 'router' ? '五个网关 + ACL' : node.kind === 'switch' ? '交换机' : `.${node.ip.split('.').at(-1)} /${node.vlan === 10 ? '26' : node.vlan === 20 || node.vlan === 40 ? '27' : '28'}${node.kind === 'server' ? ' · HTTP' : ''}`;
+    return `<g class="node ${node.kind}" data-node="${id}" transform="translate(${node.x} ${node.y})" role="button" tabindex="0" aria-label="查看 ${escapeHTML(node.name)} 的地址与角色"><rect x="${-width/2}" y="-31" width="${width}" height="62" rx="10"/><text text-anchor="middle" y="-4">${escapeHTML(node.label || node.name)}</text><text class="node-ip" text-anchor="middle" y="21">${escapeHTML(caption)}</text></g>`;
+  }).join('');
+  document.querySelectorAll('[data-node]').forEach(element => {
+    const id = element.dataset.node; nodeElements.set(id,element);
     element.addEventListener('click',() => openDevice(id));
     element.addEventListener('keydown',event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openDevice(id); } });
   });
@@ -535,18 +930,37 @@ function openDevice(id) {
 }
 
 function changeScenario() { pause(); state.step = 0; refreshScenario(); }
-function setAuthorization(authorized) { state.authorized = authorized; changeScenario(); }
+function setAuthorization(authorized) { state.grants[state.grantActor][state.grantWebsite] = authorized; changeScenario(); }
+function syncActorTargets() {
+  ['teacher','management'].forEach(target => {
+    const option = $('target').querySelector(`option[value="${target}"]`);
+    option.disabled = state.actor === 'TA';
+  });
+  if (state.actor === 'TA' && ['teacher','management'].includes(state.target)) state.target = 'public';
+  $('target').value = state.target;
+}
 function refreshScenario() {
+  syncActorTargets();
   journey = buildJourney(requestOptions());
   state.step = Math.min(state.step,journey.length-1);
-  $('grant-status').textContent = state.authorized ? (state.fault === 'order' ? 'Student-A 的许可排在拒绝之后，尚不能生效' : 'Student-A 已获得实验网页 TCP 80 许可') : 'Student-A 尚未获得实验网页许可';
-  $('grant').disabled = state.authorized; $('revoke').disabled = !state.authorized;
-  $('request-summary').textContent = `Student-${state.student} · ${TARGET_NAMES[state.target]} · ${PROTOCOL_NAMES[state.protocol]}`;
-  $('comparison').innerHTML = ['A','B'].map(student => {
-    const result = evaluateAccess(requestOptions({student,target:'lab',protocol:'http'}));
-    return `<article class="comparison-card"><h3>Student-${student} → 实验 HTTP</h3><span class="status-badge ${result.allowed ? 'success' : ''}">${result.allowed ? '成功' : '失败'}</span><p>${escapeHTML(result.reason)}</p></article>`;
-  }).join('');
+  const authorized = state.grants[state.grantActor][state.grantWebsite];
+  const who = ACTOR_NAMES[state.grantActor], website = TARGET_NAMES[state.grantWebsite];
+  $('grant-status').textContent = authorized ? (state.fault === 'order' ? `${who}：${website}许可排在拒绝之后，尚不能生效` : `${who}：已开放${website} HTTP`) : `${who}：尚未开放${website}`;
+  $('grant').disabled = authorized; $('revoke').disabled = !authorized;
+  $('grant').textContent = `开放${website}`; $('revoke').textContent = `撤销${website}许可`;
+  $('request-summary').textContent = `${ACTOR_NAMES[state.actor]} · ${TARGET_NAMES[state.target]} · ${PROTOCOL_NAMES[state.protocol]}`;
+  $('comparison').innerHTML = `<div class="table-scroll"><table class="access-matrix"><caption>三类访问者对照 · 点击结果可重放这次 HTTP 访问</caption><thead><tr><th>访问者</th><th>公开网站 .100</th><th>课程网站 .102</th><th>实验网站 .101</th></tr></thead><tbody>${['SA','SB','TA','G1'].map(actor => `<tr><th>${escapeHTML(ACTOR_NAMES[actor])}</th>${['public','course','lab'].map(target => {
+    const result = evaluateAccess(requestOptions({actor,target,protocol:'http'}));
+    const status = result.allowed ? '可访问' : result.networkAllowed ? '故障' : '受限';
+    return `<td><button class="matrix-result ${result.allowed ? 'success' : result.networkAllowed ? 'warning' : 'denied'}" data-matrix-actor="${actor}" data-matrix-target="${target}" aria-label="${escapeHTML(ACTOR_NAMES[actor])}访问${TARGET_NAMES[target]}：${status}" title="${escapeHTML(result.reason)}">${status}</button></td>`;
+  }).join('')}</tr>`).join('')}</tbody></table></div><p class="matrix-note">教师的三个网站默认开放。公开网站对所有人开放；课程与实验授权相互独立。故障挑战下，获许可的请求也可能失败。</p>`;
+  document.querySelectorAll('[data-matrix-actor]').forEach(button => button.addEventListener('click',() => {
+    state.actor = button.dataset.matrixActor; state.target = button.dataset.matrixTarget; state.protocol = 'http';
+    $('actor').value = state.actor; $('target').value = state.target; $('protocol').value = 'http';
+    changeScenario();
+  }));
   const result = evaluateAccess(requestOptions());
+  $('policy-title').textContent = `${result.policyName} · 第一条匹配决定结果`;
   $('policy-rows').innerHTML = getPolicyRows(requestOptions()).map(row => `<div class="policy-row ${row.seq === result.rule.seq ? 'match' : ''}"><b>${row.seq}</b><code>${escapeHTML(row.text)}</code><span>${row.seq === result.rule.seq ? '当前首条匹配' : row.action === 'permit' ? '许可' : '拒绝'}</span></div>`).join('');
   $('timeline').innerHTML = journey.map((step,i) => `<button data-step="${i}" aria-label="第 ${i+1} 步：${escapeHTML(step.title)}" title="${escapeHTML(step.title)}"></button>`).join('');
   document.querySelectorAll('[data-step]').forEach(button => button.addEventListener('click',() => { pause(); state.step = Number(button.dataset.step); renderStep(); }));
@@ -554,7 +968,6 @@ function refreshScenario() {
   $('current-result').innerHTML = `<b>当前结果：${escapeHTML(statusLabel(result))}</b><p>${escapeHTML(result.reason)}</p>`;
   renderStep();
 }
-
 function renderStep() {
   const step = journey[state.step];
   $('step-phase').textContent = `第 ${state.step+1} / ${journey.length} 步 · ${step.phase === 'reply' ? '回程' : step.phase === 'failure' ? '失败定位' : '请求与检查'}`;
@@ -614,13 +1027,25 @@ function registerTeachingTools() {
     try { Promise.resolve(context.registerTool(tool,{signal:lifecycle.signal})).catch(() => {}); } catch { /* UI remains available in unsupported implementations. */ }
   };
   register({name:'read_campus_lesson',title:'读取校园课堂状态',description:'Read the selected lesson and access result of this educational simulation. Does not query Packet Tracer or real devices.',inputSchema:{type:'object',properties:{},additionalProperties:false},annotations:{readOnlyHint:true,untrustedContentHint:false},execute(input){ if (!input || typeof input !== 'object' || Array.isArray(input) || Object.keys(input).length) throw new TypeError('Expected an empty object.'); return {lesson:CAMPUS_LESSONS[state.lesson].id,view:state.view,scenario:requestOptions(),result:evaluateAccess(requestOptions())}; }});
-  register({name:'configure_campus_demo',title:'设置校园授权教学演示',description:'Configure the visible, local educational simulation and open its animation tab. Grant/revoke affects only simulated Student-A HTTP access; it never changes real network permissions.',inputSchema:{type:'object',properties:{student:{type:'string',enum:['A','B']},target:{type:'string',enum:['public','lab','teacher','management']},protocol:{type:'string',enum:['http','icmp','ssh']},authorized:{type:'boolean'},fault:{type:'string',enum:['none','order','http_off','trunk']}},required:['student','target','protocol','authorized','fault'],additionalProperties:false},annotations:{readOnlyHint:false,untrustedContentHint:false},execute(input){ if (!input || typeof input !== 'object' || Array.isArray(input) || Object.keys(input).sort().join(',') !== 'authorized,fault,protocol,student,target') throw new TypeError('Expected exactly five scenario properties.'); evaluateAccess(input); Object.assign(state,input); ['student','target','protocol','fault'].forEach(key => $(key).value = state[key]); changeScenario(); setView('demo'); return {scenario:requestOptions(),result:evaluateAccess(requestOptions())}; }});
+  register({name:'configure_campus_demo',title:'设置校园访问教学演示',description:'Configure the selected actor, website, protocol and fault in this educational simulation. Does not change grants or real network permissions.',inputSchema:{type:'object',properties:{actor:{type:'string',enum:['SA','SB','TA','G1']},target:{type:'string',enum:['public','course','lab','teacher','management']},protocol:{type:'string',enum:['http','icmp','ssh']},fault:{type:'string',enum:['none','order','http_off','trunk']}},required:['actor','target','protocol','fault'],additionalProperties:false},annotations:{readOnlyHint:false,untrustedContentHint:false},execute(input){
+    if (!input || typeof input !== 'object' || Array.isArray(input) || Object.keys(input).sort().join(',') !== 'actor,fault,protocol,target') throw new TypeError('Expected exactly four scenario properties.');
+    evaluateAccess({...input,grants:state.grants}); Object.assign(state,input);
+    ['actor','target','protocol','fault'].forEach(key => $(key).value = state[key]); changeScenario(); setView('demo');
+    return {scenario:requestOptions(),result:evaluateAccess(requestOptions())};
+  }});
+  register({name:'set_campus_website_grant',title:'授予或撤销教学网站许可',description:'Grant or revoke one HTTP website for one student or guest in the visible local teaching simulation. Public and teacher website access remain automatic. Never configures real devices.',inputSchema:{type:'object',properties:{actor:{type:'string',enum:['SA','SB','G1']},website:{type:'string',enum:['course','lab']},allowed:{type:'boolean'}},required:['actor','website','allowed'],additionalProperties:false},annotations:{readOnlyHint:false,untrustedContentHint:false},execute(input){
+    if (!input || typeof input !== 'object' || Array.isArray(input) || Object.keys(input).sort().join(',') !== 'actor,allowed,website' || !['SA','SB','G1'].includes(input.actor) || !['course','lab'].includes(input.website) || typeof input.allowed !== 'boolean') throw new TypeError('Invalid website grant.');
+    state.grantActor = input.actor; state.grantWebsite = input.website; $('grant-actor').value = input.actor; $('grant-website').value = input.website;
+    setAuthorization(input.allowed); setView('demo');
+    return {actor:input.actor,website:input.website,allowed:state.grants[input.actor][input.website],result:evaluateAccess(requestOptions({actor:input.actor,target:input.website,protocol:'http'}))};
+  }});
 }
 
 $('lesson-nav').innerHTML = CAMPUS_LESSONS.map((lesson,index) => `<button class="lesson-button" data-lesson="${index}"><span>${lesson.number}</span><div>${escapeHTML(lesson.id === 'zones' ? '校园分区' : lesson.id === 'address' ? '分配地址' : lesson.id === 'vlan' ? 'VLAN 与路由' : lesson.id === 'acl' ? 'ACL 访问规则' : lesson.id === 'grant' ? '授权与撤销' : '故障排查')}<small>${escapeHTML(lesson.subtitle)}</small></div></button>`).join('');
 document.querySelectorAll('[data-lesson]').forEach(button => button.addEventListener('click',() => selectLesson(Number(button.dataset.lesson))));
 document.querySelectorAll('[data-view]').forEach(button => { button.addEventListener('click',() => setView(button.dataset.view)); button.addEventListener('keydown',event => { const tabs = ['learn','demo','lab','quiz']; let index = tabs.indexOf(state.view); if (event.key === 'ArrowRight') index = (index+1)%4; else if (event.key === 'ArrowLeft') index = (index+3)%4; else if (event.key === 'Home') index = 0; else if (event.key === 'End') index = 3; else return; event.preventDefault(); setView(tabs[index],true); }); });
-['student','target','protocol','fault'].forEach(key => $(key).addEventListener('change',() => { state[key] = $(key).value; changeScenario(); }));
+['actor','target','protocol','fault'].forEach(key => $(key).addEventListener('change',() => { state[key] = $(key).value; changeScenario(); }));
+['grant-actor','grant-website'].forEach(key => $(key).addEventListener('change',() => { state[key === 'grant-actor' ? 'grantActor' : 'grantWebsite'] = $(key).value; refreshScenario(); }));
 $('grant').addEventListener('click',() => setAuthorization(true)); $('revoke').addEventListener('click',() => setAuthorization(false));
 $('play').addEventListener('click',play); $('previous').addEventListener('click',() => advanceStep(-1)); $('next').addEventListener('click',() => advanceStep(1)); $('reset').addEventListener('click',() => { pause(); state.step = 0; renderStep(); });
 $('speed').addEventListener('change',() => { state.speed = Number($('speed').value); renderStep(); if (state.playing) scheduleNext(); });
@@ -637,20 +1062,21 @@ prepareTopology(); selectLesson(0); setView('demo'); refreshScenario(); register
   <a class="skip-link" href="#main">跳到课堂</a>
   <header class="topbar"><a class="brand" href="./校园网络授权-学习网站.html"><span class="brand-mark" aria-hidden="true">N</span><span>校园网络课堂<small>NETWORK WORKSHOP / EE6108</small></span></a><div class="top-actions"><a href="./网络动画实验室-离线版.html" class="foundation-link">基础网络五课</a><button id="presentation" aria-pressed="false">进入演示模式</button></div></header>
   <div class="workspace">
-    <aside class="sidebar" aria-label="课程目录"><div class="sidebar-title"><span class="eyebrow">一个校园 · 六堂课</span><h1>先分区，<br>再决定谁能访问。</h1><p>从学生和教师的网络，学会用规则保护教学资源。</p></div><nav id="lesson-nav"><button class="lesson-button selected" aria-current="step"><span>01</span><div>校园分区<small>先画清楚网络边界</small></div></button><button class="lesson-button"><span>02</span><div>分配地址<small>给每个区域一段地址</small></div></button><button class="lesson-button"><span>03</span><div>VLAN 与路由<small>同一条线，承载不同分区</small></div></button><button class="lesson-button"><span>04</span><div>ACL 访问规则<small>按顺序检查每一次访问</small></div></button><button class="lesson-button"><span>05</span><div>授权与撤销<small>只给 Student-A 开放网页</small></div></button><button class="lesson-button"><span>06</span><div>故障排查<small>分清规则、链路和服务</small></div></button></nav><div class="sidebar-tip"><b>先预测，再播放。</b><p>选学生 A，访问实验网站。授权前后有什么不同？再换成学生 B。</p></div></aside>
+    <aside class="sidebar" aria-label="课程目录"><div class="sidebar-title"><span class="eyebrow">一个校园 · 六堂课</span><h1>先分区，<br>再决定谁能访问。</h1><p>学生、教师、访客各有网络。公开资源人人可看，课程和实验分别授权。</p></div><nav id="lesson-nav"><button class="lesson-button selected" aria-current="step"><span>01</span><div>校园分区<small>先画清楚网络边界</small></div></button><button class="lesson-button"><span>02</span><div>分配地址<small>给每个区域一段地址</small></div></button><button class="lesson-button"><span>03</span><div>VLAN 与路由<small>同一条线，承载不同分区</small></div></button><button class="lesson-button"><span>04</span><div>ACL 访问规则<small>按顺序检查每一次访问</small></div></button><button class="lesson-button"><span>05</span><div>授权与撤销<small>按对象与网站分别开放</small></div></button><button class="lesson-button"><span>06</span><div>故障排查<small>分清规则、链路和服务</small></div></button></nav><div class="sidebar-tip"><b>先预测，再播放。</b><p>先看访客访问公开网站，再只给访客开放课程网站。实验网站会一起开放吗？</p></div></aside>
     <main id="main">
-      <section class="lesson-heading"><div><span class="eyebrow" id="lesson-kicker">01 / 校园分区</span><h2 id="lesson-title">把校园分成四个网络。</h2><p id="lesson-lead">学生、教师、服务器、管理设备各有自己的 VLAN。跨区访问先经过路由器，再由规则决定是否放行。</p></div><span class="module-tag">Packet Tracer 教学实验</span></section>
+      <section class="lesson-heading"><div><span class="eyebrow" id="lesson-kicker">01 / 校园分区</span><h2 id="lesson-title">三类访问者，三个网站。</h2><p id="lesson-lead">公开网站人人可访问；教师能打开三个网站，并可分别给学生或访客开放课程、实验网站。</p></div><span class="module-tag">Packet Tracer 教学实验</span></section>
       <div class="view-tabs" role="tablist" aria-label="学习方式"><button id="tab-learn" role="tab" data-view="learn" aria-selected="false" aria-controls="panel-learn" tabindex="-1">知识讲解</button><button id="tab-demo" role="tab" data-view="demo" aria-selected="true" aria-controls="panel-demo">动画与授权</button><button id="tab-lab" role="tab" data-view="lab" aria-selected="false" aria-controls="panel-lab" tabindex="-1">Packet Tracer 步骤</button><button id="tab-quiz" role="tab" data-view="quiz" aria-selected="false" aria-controls="panel-quiz" tabindex="-1">本课测验</button></div>
       <section id="panel-learn" class="view-panel" role="tabpanel" aria-labelledby="tab-learn" hidden></section>
       <section id="panel-demo" class="view-panel" role="tabpanel" aria-labelledby="tab-demo">
-        <div class="demo-controls"><label>发起访问的学生<select id="student"><option value="A">Student-A · .11</option><option value="B">Student-B · .12</option></select></label><label>访问目标<select id="target"><option value="lab">实验网站 · .101</option><option value="public">公共网站 · .100</option><option value="teacher">教师电脑 · .66</option><option value="management">管理区 · .114</option></select></label><label>访问方式<select id="protocol"><option value="http">网页 HTTP · TCP 80</option><option value="icmp">ping · ICMP</option><option value="ssh">远程管理 SSH · TCP 22</option></select></label><label>故障挑战<select id="fault"><option value="none">配置正常</option><option value="order">授权规则排在拒绝之后</option><option value="http_off">目标网页的 HTTP 服务关闭</option><option value="trunk">trunk 遗漏服务器 VLAN 30</option></select></label></div>
-        <div class="authorization"><div><span class="eyebrow">教师管理员 · 授权面板</span><h3 id="grant-status">Student-A 尚未获得实验网页许可</h3><p>只开放 .11 到 .101 的 TCP 80。学生 B、ping 和 SSH 不随之开放。</p></div><div class="grant-buttons"><button id="grant" class="primary">授权 Student-A</button><button id="revoke" disabled>撤销授权</button></div></div>
-        <div class="demo-grid"><div class="network-card"><div class="card-top"><h3>数据包走到哪里？</h3><span id="request-summary">Student-A · 实验网站 · HTTP</span></div><div class="diagram-scroll"><svg id="network" viewBox="0 0 1040 610" role="img" aria-label="校园网络拓扑；四个 VLAN 通过 R1 路由互联。设备可点击查看地址。"><g id="zones"><rect x="20" y="45" width="270" height="405" rx="18" fill="#edf8ef"/><text x="40" y="76" class="zone-label">学生区 · VLAN 10</text><rect x="748" y="20" width="272" height="175" rx="18" fill="#eef4ff"/><text x="768" y="47" class="zone-label">教师区 · VLAN 20</text><rect x="748" y="225" width="272" height="212" rx="18" fill="#f5efff"/><text x="768" y="255" class="zone-label">服务器区 · VLAN 30</text><rect x="748" y="470" width="272" height="122" rx="18" fill="#fff5df"/><text x="768" y="497" class="zone-label">管理区 · VLAN 99</text></g><g id="links" stroke="#9baeb4" stroke-width="3" fill="none"><path d="M100 165 L225 265 M100 365 L225 265 M225 265 L435 265 M435 265 L600 265 M435 265 L800 110 M800 110 L945 88 M800 110 L945 160 M435 265 L935 300 M435 265 L935 397 M435 265 L935 545"/></g><g id="devices"><g class="node" transform="translate(100 165)"><rect x="-60" y="-29" width="120" height="58" rx="10"/><text text-anchor="middle" y="-2">Student-A</text><text class="node-ip" text-anchor="middle" y="19">.11 /26</text></g><g class="node" transform="translate(100 365)"><rect x="-60" y="-29" width="120" height="58" rx="10"/><text text-anchor="middle" y="-2">Student-B</text><text class="node-ip" text-anchor="middle" y="19">.12 /26</text></g><g class="node switch" transform="translate(225 265)"><rect x="-58" y="-29" width="116" height="58" rx="10"/><text text-anchor="middle" y="-2">STU-SW</text><text class="node-ip" text-anchor="middle" y="19">学生交换机</text></g><g class="node switch" transform="translate(435 265)"><rect x="-62" y="-29" width="124" height="58" rx="10"/><text text-anchor="middle" y="-2">CORE-SW</text><text class="node-ip" text-anchor="middle" y="19">核心交换机</text></g><g class="node router" transform="translate(600 265)"><rect x="-62" y="-34" width="124" height="68" rx="14"/><text text-anchor="middle" y="-5">R1</text><text class="node-ip" text-anchor="middle" y="18">路由 + ACL</text></g><g class="node switch" transform="translate(800 110)"><rect x="-56" y="-29" width="112" height="58" rx="10"/><text text-anchor="middle" y="-2">TCH-SW</text><text class="node-ip" text-anchor="middle" y="19">教师交换机</text></g><g class="node" transform="translate(945 88)"><rect x="-60" y="-29" width="120" height="58" rx="10"/><text text-anchor="middle" y="-2">Teacher-A</text><text class="node-ip" text-anchor="middle" y="19">.66 /27</text></g><g class="node" transform="translate(945 160)"><rect x="-60" y="-29" width="120" height="58" rx="10"/><text text-anchor="middle" y="-2">Teacher-B</text><text class="node-ip" text-anchor="middle" y="19">.67 /27</text></g><g class="node" transform="translate(935 300)"><rect x="-71" y="-29" width="142" height="58" rx="10"/><text text-anchor="middle" y="-2">公共教学网站</text><text class="node-ip" text-anchor="middle" y="19">.100 /28 · HTTP</text></g><g class="node" transform="translate(935 397)"><rect x="-71" y="-29" width="142" height="58" rx="10"/><text text-anchor="middle" y="-2">受限实验网站</text><text class="node-ip" text-anchor="middle" y="19">.101 /28 · HTTP</text></g><g class="node" transform="translate(935 545)"><rect x="-71" y="-29" width="142" height="58" rx="10"/><text text-anchor="middle" y="-2">AUTH-PC</text><text class="node-ip" text-anchor="middle" y="19">.114 /28 · 管理员</text></g></g><g id="packet" pointer-events="none" hidden><circle r="11" fill="#147957" stroke="white" stroke-width="4"/></g></svg></div><div class="diagram-foot"><span>所有 IP 均以 192.168.10 开头</span><span>点设备查看配置</span></div></div><aside class="step-card"><span class="eyebrow" id="step-phase">第 1 步 · 判断目的地</span><h3 id="step-title">先交给默认网关。</h3><p id="step-description">实验服务器在另一个子网，学生电脑先把请求交给 .1 网关。学生进入 R1 的流量将按 ACL 顺序检查。</p><pre id="step-detail">源 IP：192.168.10.11
-目的 IP：192.168.10.101</pre><div class="current-result" id="current-result" role="status"><b>当前结果：拒绝</b><p>尚未添加 Student-A 的实验网站授权。</p></div></aside></div>
+        <div class="demo-controls"><label>发起访问的人<select id="actor"><option value="SA">学生 A · Student-A .11</option><option value="SB">学生 B · Student-B .12</option><option value="TA">教师 · Teacher-A .66</option><option value="G1" selected>访客 · Guest-1 .130</option></select></label><label>访问目标<select id="target"><option value="public">公开网站 · .100</option><option value="course">课程网站 · .102</option><option value="lab">实验网站 · .101</option><option value="teacher">教师电脑 · .66（隔离检查）</option><option value="management">管理区 · .114（隔离检查）</option></select></label><label>访问方式<select id="protocol"><option value="http">网页 HTTP · TCP 80</option><option value="icmp">ping · ICMP</option><option value="ssh">远程管理 SSH · TCP 22</option></select></label><label>故障挑战<select id="fault"><option value="none">配置正常</option><option value="order">授权规则排在拒绝之后</option><option value="http_off">所选网站的 HTTP 服务关闭</option><option value="trunk">trunk 遗漏服务器 VLAN 30</option></select></label></div>
+        <div class="baseline-policy"><span>公开网站：所有人可访问</span><span>教师：三个网站默认开放</span><span>学生 / Guest：课程、实验独立授权</span></div>
+        <div class="authorization"><div class="grant-context"><span class="eyebrow">教师管理员 · 选择对象与网站</span><h3 id="grant-status">选择要开放的教学资源</h3><p>只授予这台电脑到这个网站的 HTTP。其他电脑与网站不随之开放。</p></div><div class="grant-scope"><label>授权对象<select id="grant-actor"><option value="SA">学生 A · .11</option><option value="SB">学生 B · .12</option><option value="G1">访客 Guest-1 · .130</option></select></label><label>授权网站<select id="grant-website"><option value="course">课程网站 · .102</option><option value="lab">实验网站 · .101</option></select></label><div class="grant-buttons"><button id="grant" class="primary">开放课程网站</button><button id="revoke" disabled>撤销课程网站许可</button></div></div></div>
         <div class="playback"><div class="playback-buttons"><button id="reset" aria-label="重新开始">重置</button><button id="previous" aria-label="上一步">上一步</button><button id="play" class="primary">播放动画</button><button id="next" aria-label="下一步">下一步</button></div><div id="timeline" class="timeline" aria-label="动画步骤"></div><label class="speed-label">速度<select id="speed"><option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option><option value="2">2×</option></select></label></div>
+        <div class="demo-grid"><div class="network-card"><div class="card-top"><h3>数据包走到哪里？</h3><span id="request-summary">访客 Guest-1 · 公开网站 · HTTP</span></div><div class="diagram-scroll"><svg id="network" viewBox="0 0 1040 610" role="img" aria-label="校园网络拓扑；五个 VLAN 通过 R1 路由互联。设备可点击查看地址。"><g id="zones"><rect x="20" y="45" width="270" height="405" rx="18" fill="#edf8ef"/><text x="40" y="76" class="zone-label">学生区 · VLAN 10</text><rect x="748" y="20" width="272" height="175" rx="18" fill="#eef4ff"/><text x="768" y="47" class="zone-label">教师区 · VLAN 20</text><rect x="748" y="225" width="272" height="212" rx="18" fill="#f5efff"/><text x="768" y="255" class="zone-label">服务器区 · VLAN 30</text><rect x="748" y="470" width="272" height="122" rx="18" fill="#fff5df"/><text x="768" y="497" class="zone-label">管理区 · VLAN 99</text></g><g id="links" stroke="#9baeb4" stroke-width="3" fill="none"><path d="M100 165 L225 265 M100 365 L225 265 M225 265 L435 265 M435 265 L600 265 M435 265 L800 110 M800 110 L945 88 M800 110 L945 160 M435 265 L935 300 M435 265 L935 397 M435 265 L935 545"/></g><g id="devices"><g class="node" transform="translate(100 165)"><rect x="-60" y="-29" width="120" height="58" rx="10"/><text text-anchor="middle" y="-2">Student-A</text><text class="node-ip" text-anchor="middle" y="19">.11 /26</text></g><g class="node" transform="translate(100 365)"><rect x="-60" y="-29" width="120" height="58" rx="10"/><text text-anchor="middle" y="-2">Student-B</text><text class="node-ip" text-anchor="middle" y="19">.12 /26</text></g><g class="node switch" transform="translate(225 265)"><rect x="-58" y="-29" width="116" height="58" rx="10"/><text text-anchor="middle" y="-2">STU-SW</text><text class="node-ip" text-anchor="middle" y="19">学生交换机</text></g><g class="node switch" transform="translate(435 265)"><rect x="-62" y="-29" width="124" height="58" rx="10"/><text text-anchor="middle" y="-2">CORE-SW</text><text class="node-ip" text-anchor="middle" y="19">核心交换机</text></g><g class="node router" transform="translate(600 265)"><rect x="-62" y="-34" width="124" height="68" rx="14"/><text text-anchor="middle" y="-5">R1</text><text class="node-ip" text-anchor="middle" y="18">路由 + ACL</text></g><g class="node switch" transform="translate(800 110)"><rect x="-56" y="-29" width="112" height="58" rx="10"/><text text-anchor="middle" y="-2">TCH-SW</text><text class="node-ip" text-anchor="middle" y="19">教师交换机</text></g><g class="node" transform="translate(945 88)"><rect x="-60" y="-29" width="120" height="58" rx="10"/><text text-anchor="middle" y="-2">Teacher-A</text><text class="node-ip" text-anchor="middle" y="19">.66 /27</text></g><g class="node" transform="translate(945 160)"><rect x="-60" y="-29" width="120" height="58" rx="10"/><text text-anchor="middle" y="-2">Teacher-B</text><text class="node-ip" text-anchor="middle" y="19">.67 /27</text></g><g class="node" transform="translate(935 300)"><rect x="-71" y="-29" width="142" height="58" rx="10"/><text text-anchor="middle" y="-2">公共教学网站</text><text class="node-ip" text-anchor="middle" y="19">.100 /28 · HTTP</text></g><g class="node" transform="translate(935 397)"><rect x="-71" y="-29" width="142" height="58" rx="10"/><text text-anchor="middle" y="-2">受限实验网站</text><text class="node-ip" text-anchor="middle" y="19">.101 /28 · HTTP</text></g><g class="node" transform="translate(935 545)"><rect x="-71" y="-29" width="142" height="58" rx="10"/><text text-anchor="middle" y="-2">AUTH-PC</text><text class="node-ip" text-anchor="middle" y="19">.114 /28 · 管理员</text></g></g><g id="packet" pointer-events="none" hidden><circle r="11" fill="#147957" stroke="white" stroke-width="4"/></g></svg></div><div class="diagram-foot"><span>所有 IP 均以 192.168.10 开头</span><span>点设备查看配置</span></div></div><aside class="step-card"><span class="eyebrow" id="step-phase">第 1 步 · 判断目的地</span><h3 id="step-title">先交给默认网关。</h3><p id="step-description">公开网站位于服务器 VLAN。访客先把请求交给 .129 网关，再检查访客入口规则。</p><details class="step-details"><summary>讲解细节与协议说明</summary><pre id="step-detail">源 IP：192.168.10.130
+目的 IP：192.168.10.100</pre></details><div class="current-result" id="current-result" role="status"><b>当前结果：允许访问</b><p>公开 HTTP 是所有访问者的基线许可。</p></div></aside></div>
         <p class="model-note">这是教学动画。假设 ARP 缓存已就绪，不逐个模拟 TCP 握手；按钮不会配置真实设备或 Packet Tracer。</p>
-        <div id="comparison" class="comparison" aria-label="两名学生访问实验网站的对照结果"></div>
-        <details class="policy-card" open><summary>查看当前 ACL：从上到下，第一条匹配决定结果</summary><div id="policy-rows"></div><p>规则应用在 R1 的 VLAN 10 子接口入方向。同 VLAN 之间的流量不会经过这里。</p></details>
+        <div id="comparison" class="comparison" aria-label="学生、教师、访客访问三个网站的对照表"></div>
+        <details class="policy-card" open><summary id="policy-title">查看当前入口 ACL：第一条匹配决定结果</summary><div id="policy-rows"></div><p>学生、访客、教师分别在 R1 的 .10、.40、.20 子接口入方向检查。网站位于独立 VLAN 30；同 VLAN 流量不会经过这些入口规则。</p></details>
       </section>
       <section id="panel-lab" class="view-panel" role="tabpanel" aria-labelledby="tab-lab" hidden></section>
       <section id="panel-quiz" class="view-panel" role="tabpanel" aria-labelledby="tab-quiz" hidden></section>
