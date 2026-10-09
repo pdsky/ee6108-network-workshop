@@ -227,3 +227,20 @@ export function buildJourney(options = {}) {
         : `此许可只适用于 ${input.actor} → ${target.node} 的 TCP 80。换来源、换网站或换协议后要重新判断；撤销后验证一次新的请求，已经缓存或下载的网页不会自动消失。` });
   return steps;
 }
+
+/** Inspect the same first-match decision; later rows are never executed. */
+export function inspectAccess(options = {}) {
+  const input = normalize(options), source = ACTORS[input.actor], target = TARGETS[input.target];
+  const result = evaluateAccess(input), rules = getPolicyRows(input);
+  const first = rules.findIndex(rule => rule.seq === result.rule.seq);
+  return {
+    source: {...source}, destination: {...target}, protocol: input.protocol,
+    port: input.protocol === 'http' ? 80 : input.protocol === 'ssh' ? 22 : null,
+    result,
+    trace: rules.map((rule, index) => ({
+      seq: rule.seq, text: rule.text, explanation: rule.explanation,
+      state: index > first ? 'skipped' : index === first ? rule.action : 'miss',
+      checks: Object.entries(rule.match).map(([field, expected]) => ({field, expected, actual: input[field], matches: input[field] === expected}))
+    }))
+  };
+}

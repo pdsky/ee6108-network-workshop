@@ -17,7 +17,7 @@ entry_name = 'campus.js' if campus else 'app.js'
 html = (static / page_name).read_text(encoding='utf-8')
 css = (static / css_name).read_text(encoding='utf-8')
 scripts = []
-for name in (['campus-lessons.js','campus-model.js','campus.js'] if campus else ['lessons.js', 'model.js', 'study.js', 'app.js']):
+for name in (['campus-lessons.js','campus-model.js','campus-redundancy.js','campus-extensions.js','campus.js'] if campus else ['lessons.js', 'model.js', 'study.js', 'app.js']):
     source = (static / name).read_text(encoding='utf-8')
     source = re.sub(r'^import .*?;\s*$', '', source, flags=re.MULTILINE)
     source = re.sub(r'^export ', '', source, flags=re.MULTILINE)

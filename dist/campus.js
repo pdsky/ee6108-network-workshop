@@ -1,11 +1,13 @@
-import { CAMPUS_LESSONS } from './campus-lessons.js?v=guest-20261006';
-import { evaluateAccess, buildJourney, getPolicyRows, createGrants } from './campus-model.js?v=guest-20261006';
+import { initCampusExtensions } from './campus-extensions.js?v=access-20261009-r3';
+import { CAMPUS_LESSONS } from './campus-lessons.js?v=access-20261009-r3';
+import { evaluateAccess, buildJourney, getPolicyRows, createGrants } from './campus-model.js?v=access-20261009-r3';
 
 const $ = (id) => document.getElementById(id);
 const escapeHTML = (value) => String(value).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const state = { lesson: 0, view: 'demo', actor: 'G1', target: 'public', protocol: 'http', grants: createGrants(), grantActor: 'SA', grantWebsite: 'course', fault: 'none', step: 0, speed: 1, playing: false, presentation: false };
 const answers = new Map();
 let journey = [];
+let classroomExtension;
 let timer;
 let animationFrame;
 let animationGeneration = 0;
@@ -43,8 +45,9 @@ function requestOptions(extra = {}) { return {actor:state.actor,target:state.tar
 function statusLabel(result) { return result.allowed ? '允许访问' : result.networkAllowed ? '许可已通过，访问失败' : '被 ACL 拒绝'; }
 
 function setView(view, focus = false) {
-  if (!['learn','demo','lab','quiz'].includes(view)) return;
-  if (view !== 'demo') pause();
+  if (!['learn','demo','lab','backup','quiz'].includes(view)) return;
+  if (view !== 'demo') { pause(); classroomExtension?.stopAuthorization(); }
+  if (view !== 'backup') classroomExtension?.stopBackup();
   state.view = view;
   document.querySelectorAll('[data-view]').forEach(button => {
     const selected = button.dataset.view === view;
@@ -172,6 +175,7 @@ function prepareTopology() {
 function openDevice(id) {
   const node = NODES[id]; $('device-title').textContent = node.name;
   $('device-info').innerHTML = node.ip ? `<dl class="device-properties"><dt>IP</dt><dd>${node.ip}</dd><dt>掩码</dt><dd>${node.mask}</dd><dt>默认网关</dt><dd>${node.gateway}</dd><dt>地址所属 VLAN</dt><dd>${node.vlan}</dd></dl><p>${escapeHTML(node.role)}</p>` : `<p>${escapeHTML(node.role)}</p><dl class="device-properties">${PLAN.map(row => `<dt>G0/0.${row[1]}</dt><dd>192.168.10${row[4]} · VLAN ${row[1]}</dd>`).join('')}</dl>`;
+  $('device-info').insertAdjacentHTML('beforeend',classroomExtension?.deviceBackupInfo(id) || '');
   $('device-dialog').showModal();
 }
 
@@ -213,6 +217,7 @@ function refreshScenario() {
   $('current-result').className = `current-result ${result.allowed ? 'success' : result.networkAllowed ? 'warning' : ''}`;
   $('current-result').innerHTML = `<b>当前结果：${escapeHTML(statusLabel(result))}</b><p>${escapeHTML(result.reason)}</p>`;
   renderStep();
+  classroomExtension?.refresh();
 }
 function renderStep() {
   const step = journey[state.step];
@@ -230,6 +235,7 @@ function renderStep() {
     link.style.stroke = active ? (step.phase === 'reply' ? '#347bc4' : '#21895c') : '#b1c2c7'; link.style.strokeWidth = active ? '5' : '3';
   });
   animatePacket(step);
+  classroomExtension?.requestStage(step);
 }
 function animatePacket(step) {
   cancelAnimationFrame(animationFrame); const generation = ++animationGeneration;
@@ -289,7 +295,7 @@ function registerTeachingTools() {
 
 $('lesson-nav').innerHTML = CAMPUS_LESSONS.map((lesson,index) => `<button class="lesson-button" data-lesson="${index}"><span>${lesson.number}</span><div>${escapeHTML(lesson.id === 'zones' ? '校园分区' : lesson.id === 'address' ? '分配地址' : lesson.id === 'vlan' ? 'VLAN 与路由' : lesson.id === 'acl' ? 'ACL 访问规则' : lesson.id === 'grant' ? '授权与撤销' : '故障排查')}<small>${escapeHTML(lesson.subtitle)}</small></div></button>`).join('');
 document.querySelectorAll('[data-lesson]').forEach(button => button.addEventListener('click',() => selectLesson(Number(button.dataset.lesson))));
-document.querySelectorAll('[data-view]').forEach(button => { button.addEventListener('click',() => setView(button.dataset.view)); button.addEventListener('keydown',event => { const tabs = ['learn','demo','lab','quiz']; let index = tabs.indexOf(state.view); if (event.key === 'ArrowRight') index = (index+1)%4; else if (event.key === 'ArrowLeft') index = (index+3)%4; else if (event.key === 'Home') index = 0; else if (event.key === 'End') index = 3; else return; event.preventDefault(); setView(tabs[index],true); }); });
+document.querySelectorAll('[data-view]').forEach(button => { button.addEventListener('click',() => setView(button.dataset.view)); button.addEventListener('keydown',event => { const tabs = ['learn','demo','lab','backup','quiz']; let index = tabs.indexOf(state.view); if (event.key === 'ArrowRight') index = (index+1)%4; else if (event.key === 'ArrowLeft') index = (index+3)%4; else if (event.key === 'Home') index = 0; else if (event.key === 'End') index = 3; else return; event.preventDefault(); setView(tabs[index],true); }); });
 ['actor','target','protocol','fault'].forEach(key => $(key).addEventListener('change',() => { state[key] = $(key).value; changeScenario(); }));
 ['grant-actor','grant-website'].forEach(key => $(key).addEventListener('change',() => { state[key === 'grant-actor' ? 'grantActor' : 'grantWebsite'] = $(key).value; refreshScenario(); }));
 $('grant').addEventListener('click',() => setAuthorization(true)); $('revoke').addEventListener('click',() => setAuthorization(false));
@@ -300,4 +306,6 @@ $('presentation').addEventListener('click',() => { state.presentation = !state.p
 $('close-device').addEventListener('click',() => $('device-dialog').close());
 document.addEventListener('keydown',event => { if (state.view !== 'demo' || $('device-dialog').open || /INPUT|SELECT|TEXTAREA|BUTTON|A|SUMMARY/.test(event.target.tagName)) return; if (event.key === ' ') { event.preventDefault(); play(); } else if (event.key === 'ArrowRight') advanceStep(1); else if (event.key === 'ArrowLeft') advanceStep(-1); });
 window.addEventListener('pagehide',() => { pause(); cancelAnimationFrame(animationFrame); });
-prepareTopology(); selectLesson(0); setView('demo'); refreshScenario(); registerTeachingTools();
+prepareTopology(); selectLesson(0); setView('demo'); refreshScenario();
+classroomExtension = initCampusExtensions({nodes:NODES,getOptions:() => requestOptions(),getGrantScope:() => ({actor:state.grantActor,website:state.grantWebsite}),commitGrant:(actor,website,allowed) => {state.grants[actor][website] = allowed; changeScenario();},setView});
+registerTeachingTools();
