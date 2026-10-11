@@ -6,12 +6,12 @@
   <meta name="description" content="学生、教师、访客三类访问者，五个 VLAN 与三个网站；学习公开访问、部分网站授权和撤销。附 Packet Tracer 步骤与测验。">
   <title>校园网络课堂 · 从分区到授权</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23123c39'/%3E%3Cpath d='M16 32h32M32 16v32' stroke='%23bceda0' stroke-width='5'/%3E%3Ccircle cx='32' cy='32' r='7' fill='%23bceda0'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="./campus.css?v=access-20261009-r3">
-  <script type="module" src="./campus.js?v=access-20261009-r3"></script>
+  <link rel="stylesheet" href="./campus.css?v=lab-20261011">
+  <script type="module" src="./campus.js?v=lab-20261011"></script>
 </head>
 <body>
   <a class="skip-link" href="#main">跳到课堂</a>
-  <header class="topbar"><a class="brand" href="./campus.html"><span class="brand-mark" aria-hidden="true">N</span><span>校园网络课堂<small>NETWORK WORKSHOP / EE6108</small></span></a><div class="top-actions"><a href="./index.html" class="foundation-link">基础网络五课</a><button id="presentation" aria-pressed="false">进入演示模式</button></div></header>
+  <header class="topbar"><a class="brand" href="./campus.html"><span class="brand-mark" aria-hidden="true">N</span><span>校园网络课堂<small>NETWORK WORKSHOP / EE6108</small></span></a><div class="top-actions"><a href="./lab.html" class="foundation-link">实作工程与下载</a><a href="./index.html" class="foundation-link">基础网络五课</a><button id="presentation" aria-pressed="false">进入演示模式</button></div></header>
   <div class="workspace">
     <aside class="sidebar" aria-label="课程目录"><div class="sidebar-title"><span class="eyebrow">一个校园 · 六堂课</span><h1>先分区，<br>再决定谁能访问。</h1><p>学生、教师、访客各有网络。公开资源人人可看，课程和实验分别授权。</p></div><nav id="lesson-nav"><button class="lesson-button selected" aria-current="step"><span>01</span><div>校园分区<small>先画清楚网络边界</small></div></button><button class="lesson-button"><span>02</span><div>分配地址<small>给每个区域一段地址</small></div></button><button class="lesson-button"><span>03</span><div>VLAN 与路由<small>同一条线，承载不同分区</small></div></button><button class="lesson-button"><span>04</span><div>ACL 访问规则<small>按顺序检查每一次访问</small></div></button><button class="lesson-button"><span>05</span><div>授权与撤销<small>按对象与网站分别开放</small></div></button><button class="lesson-button"><span>06</span><div>故障排查<small>分清规则、链路和服务</small></div></button></nav><div class="sidebar-tip"><b>先预测，再播放。</b><p>先看访客访问公开网站，再只给访客开放课程网站。实验网站会一起开放吗？</p></div></aside>
     <main id="main">

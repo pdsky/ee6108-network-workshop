@@ -28,6 +28,7 @@ html = re.sub(r'<script type="module" src="\./' + re.escape(entry_name) + r'(?:\
 html = html.replace('href="./" aria-label="网络动画实验室首页"', 'href="#" aria-label="网络动画实验室首页"')
 html = html.replace('href="./campus.html"', 'href="./校园网络授权-学习网站.html"')
 html = html.replace('href="./index.html"', 'href="./网络动画实验室-离线版.html"')
+html = html.replace('href="./lab.html"', 'href="https://network-workshop-animation.paddypan93.chatgpt.site/lab.html"')
 output = Path(args.output).expanduser().resolve()
 output.parent.mkdir(parents=True, exist_ok=True)
 output.write_text(html, encoding='utf-8')

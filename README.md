@@ -2,6 +2,12 @@
 
 两套中文网络工作坊学习与授课网页：基础五课讲解子网、ARP、交换、网关与静态路由；校园授权六课讲解学生、教师与访客分区、VLAN、ACL，以及按电脑、按网站独立授予和撤销访问许可。
 
+## 新增：17 节点 Packet Tracer 实作（2026-10-11）
+
+网页导读：`dist/lab.html`；原文件和完整说明：[labs/campus_authorization](labs/campus_authorization/README.md)。学生包提供空白配置起点，教师包提供完成版、仿真 SSH 账号/密钥和参考答案。网站导读包含六阶段任务、默认访问矩阵和与实际命名 ACL 对应的命令生成器。
+
+静态预览或部署前运行 `python3 scripts/prepare-lab-assets.py`，将原始实验文件复制到 `dist/labs/`；生成目录不重复提交。此工程 R2 是远端路由器，采用 PVST/STP 备用链路；与 32 节点 HSRP 动画提案分别使用。
+
 ## 校园网络授权六课
 
 入口：`dist/campus.html`。页面顶部直接提供 **知识讲解、动画与授权、Packet Tracer 步骤、故障与备份、本课测验** 五个入口，新增「故障与备份」。

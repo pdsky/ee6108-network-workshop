@@ -6,3 +6,6 @@ network-workshop-offline.html
 .openai/
 .sites-runtime/
 *.tar.gz
+
+# Generated downloads; originals live in labs/
+dist/labs/
