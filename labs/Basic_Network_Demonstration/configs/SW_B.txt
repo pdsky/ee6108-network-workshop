@@ -1,0 +1,30 @@
+enable
+configure terminal
+hostname SW-B
+vlan 10
+name STUDENT
+exit
+vlan 20
+name TEACHER
+exit
+vlan 30
+name SERVER
+exit
+interface FastEthernet0/1
+switchport mode access
+switchport access vlan 10
+no shutdown
+exit
+interface FastEthernet0/2
+switchport mode access
+switchport access vlan 30
+no shutdown
+exit
+interface GigabitEthernet0/1
+switchport mode trunk
+switchport trunk allowed vlan 10,20,30
+no shutdown
+exit
+end
+copy running-config startup-config
+

@@ -1,0 +1,13 @@
+hostname R1
+ip access-list extended STUDENT_POLICY
+permit tcp 10.61.8.0 0.0.0.63 host 10.61.8.100 eq 80
+permit icmp 10.61.8.0 0.0.0.63 host 10.61.8.100
+deny ip 10.61.8.0 0.0.0.63 host 10.61.8.100
+deny ip 10.61.8.0 0.0.0.63 10.61.8.64 0.0.0.31
+permit ip any any
+exit
+interface GigabitEthernet0/0.10
+ip access-group STUDENT_POLICY in
+exit
+end
+

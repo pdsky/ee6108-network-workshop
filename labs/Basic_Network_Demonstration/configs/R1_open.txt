@@ -1,0 +1,27 @@
+enable
+configure terminal
+hostname R1
+interface GigabitEthernet0/0
+no ip address
+no shutdown
+exit
+interface GigabitEthernet0/0.10
+encapsulation dot1Q 10
+ip address 10.61.8.1 255.255.255.192
+exit
+interface GigabitEthernet0/0.20
+encapsulation dot1Q 20
+ip address 10.61.8.65 255.255.255.224
+exit
+interface GigabitEthernet0/0.30
+encapsulation dot1Q 30
+ip address 10.61.8.97 255.255.255.240
+exit
+interface GigabitEthernet0/1
+ip address 10.61.8.113 255.255.255.252
+no shutdown
+exit
+ip route 10.61.9.0 255.255.255.224 10.61.8.114
+end
+copy running-config startup-config
+

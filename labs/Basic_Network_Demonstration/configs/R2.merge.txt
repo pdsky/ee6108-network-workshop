@@ -1,0 +1,13 @@
+hostname R2
+!
+interface GigabitEthernet0/0
+ ip address 10.61.8.114 255.255.255.252
+ no shutdown
+!
+interface GigabitEthernet0/1
+ ip address 10.61.9.1 255.255.255.224
+ no shutdown
+!
+ip route 10.61.8.0 255.255.255.0 10.61.8.113
+!
+end
